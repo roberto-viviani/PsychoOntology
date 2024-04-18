@@ -6,7 +6,8 @@ output: word_document
 ---
 
 ```{r setup, echo=FALSE, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, fig.dim = c(8,5.2))
+library(ggplot2)
 
 library(Rcpp)
 # define matlab's pdist2
@@ -70,11 +71,12 @@ cdist <- crossdist(NEOmx, PIDmx)
 cormx <- cor(as.matrix(scales |> select(starts_with("NEO"))), 
     as.matrix(scales |> select(starts_with("PID"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
-                      itemNEO = NEO$type, itemPID = rep(PID$type, each = nrow(NEO)))
+                      typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
+                      itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
 
 library(ggplot2)
-ggplot(cordata, aes(cosdist, corrs, color = itemNEO)) + geom_point(shape=21) + 
-  geom_smooth(aes(group = itemNEO), method = "lm", se = F) + 
+ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) + geom_point(shape=21) + 
+  geom_smooth(aes(group = typeNEO), method = "lm", se = F) + 
   theme_classic()
 
 ```
@@ -82,12 +84,66 @@ ggplot(cordata, aes(cosdist, corrs, color = itemNEO)) + geom_point(shape=21) +
 This is as expected, except for conscientiousness. Here, we can show that with lower semantic distance the associations diverge into two groups.
 
 ```{r, message = FALSE}
-ggplot(filter(cordata, itemNEO == "Gewissenhaftigkeit"), 
+ggplot(filter(cordata, typeNEO == "Gewissenhaftigkeit"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = itemPID, color = itemPID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Gewissenhaftigkeit", cosdist < 0.95 | corrs < -0.4), 
+            aes(label = typePID), alpha = 0.3) +
   theme_classic()
 
 ```
 
-Furthermore, the items that associated positively with PID subscales concern rigidity, separation anxiety, orderliness. Distractability and manipulativenes/irresponsibility are negatively associated with conscientiousness, meaning individuals who are more conscienscious are less distractable and irresponsible.
+Furthermore, the items that associated positively with PID subscales concern rigidity and perfectionism. Distractability and irresponsibility are negatively associated with conscientiousness, meaning individuals who are more conscienscious are less distractable and irresponsible.
+
+Extraversion, by contrast, appears to be so sparsely distributed because of the selective negative association of some items with anhedonia, anxiety, and withdrawal. Here, the language model detected semantic affinities between properties such as distractiability, impulsivity, and emotional lability that were not confirmed by higher response associations.
+
+```{r, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Extraversion"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Extraversion", cosdist < 0.99, corrs < -0.2), 
+            aes(label = typePID), alpha = 0.3) +
+  theme_classic()
+
+```
+
+Agreableness, in contrast, presents a weak and less specific negative association with the PID traits, with some stronger associations with manipulativeness and deceitfulness.
+
+```{r, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Verträglichkeit"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Verträglichkeit", cosdist < 0.99, corrs < -0.2), 
+            aes(label = typePID), alpha = 0.3) +
+  theme_classic()
+
+```
+
+Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
+
+```{r, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Offenheit"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Offenheit", corrs < -0.2), 
+            aes(label = typePID), alpha = 0.3) +
+  theme_classic()
+
+```
+
+We can identify the NEO items that are responsible for these associations:
+
+```{r, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Offenheit"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Offenheit", corrs < -0.2), 
+            aes(label = itemNEO), alpha = 0.3) +
+  theme_classic()
+
+```
