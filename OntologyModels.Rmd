@@ -1,0 +1,93 @@
+---
+title: "Ontology Models"
+author: "Roberto"
+date: "2024-04-18"
+output: word_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(Rcpp)
+# define matlab's pdist2
+cppFunction('NumericMatrix crossdist(NumericMatrix m1, NumericMatrix m2) {
+
+  int nrow1 = m1.nrow();
+  int nrow2 = m2.nrow();
+  int ncol = m1.ncol();
+ 
+  if (ncol != m2.ncol()) {
+    throw std::runtime_error("Incompatible number of dimensions");
+  }
+ 
+  NumericMatrix out(nrow1, nrow2);
+ 
+  for (int r1 = 0; r1 < nrow1; r1++) {
+    for (int r2 = 0; r2 < nrow2; r2++) {
+      double total = 0;
+      for (int c12 = 0; c12 < ncol; c12++) {
+        total += pow(m1(r1, c12) - m2(r2, c12), 2);
+      }
+      out(r1, r2) = sqrt(total);
+    }
+  }
+ 
+  return out;
+
+}')
+
+embmx <- function(frm) {
+  mx = matrix(nrow = nrow(frm), ncol = 3072)
+  for (count in 1 : nrow(frm)) {
+    eb <- frm[count,"embedding"]
+    em <- sub("\\[", "c\\(", eb)
+    em <- sub("\\]", "\\)", em)
+    c <- eval(str2expression(em))
+    mx[count,] <- c
+  }
+  mx
+}
+
+embeddings <- read.csv("scales_openAI_large.csv")
+
+library(dplyr)
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+NEOmx <- embmx(NEO)
+PIDmx <- embmx(PID)
+rm(embeddings)
+
+scales <- read.csv("scales_data.csv")
+cormx <- cor(as.matrix(scales |> select(starts_with("NEO"))), 
+    as.matrix(scales |> select(starts_with("PID"))))
+
+```
+
+We plot correlation on cosine distance of emebddings, to see if distance predicts correlation. We consider different NEO subscales separately.
+
+```{r, message = FALSE }
+cdist <- crossdist(NEOmx, PIDmx)
+cormx <- cor(as.matrix(scales |> select(starts_with("NEO"))), 
+    as.matrix(scales |> select(starts_with("PID"))))
+cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
+                      itemNEO = NEO$type, itemPID = rep(PID$type, each = nrow(NEO)))
+
+library(ggplot2)
+ggplot(cordata, aes(cosdist, corrs, color = itemNEO)) + geom_point(shape=21) + 
+  geom_smooth(aes(group = itemNEO), method = "lm", se = F) + 
+  theme_classic()
+
+```
+
+This is as expected, except for conscientiousness. Here, we can show that with lower semantic distance the associations diverge into two groups.
+
+```{r, message = FALSE}
+ggplot(filter(cordata, itemNEO == "Gewissenhaftigkeit"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = itemPID, color = itemPID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  theme_classic()
+
+```
+
+Furthermore, the items that associated positively with PID subscales concern rigidity, separation anxiety, orderliness. Distractability and manipulativenes/irresponsibility are negatively associated with conscientiousness, meaning individuals who are more conscienscious are less distractable and irresponsible.
