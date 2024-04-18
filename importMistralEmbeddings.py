@@ -8,7 +8,7 @@ from mistralai.client import MistralClient
 api_key = os.environ["MISTRAL_API_KEY"]
 embed_model = "mistral-embed"
 
-data = pd.read_csv('scales.csv')
+data = pd.read_csv('scales.csv', encoding='unicode_escape')
 # select rows of data where scaleID is either 'PDS', 'NEO', or 'ADS'
 data = data[data['scaleID'].isin(['PID', 'NEO', 'ADS'])]
 

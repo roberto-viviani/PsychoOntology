@@ -7,7 +7,7 @@ import pandas as pd
 from haystack.components.embedders import HuggingFaceTEITextEmbedder
 from haystack.utils import Secret
 
-data = pd.read_csv('scales.csv')
+data = pd.read_csv('scales.csv', encoding='unicode_escape')
 # select rows of data where scaleID is either 'PDS', 'NEO', or 'ADS'
 data = data[data['scaleID'].isin(['PID', 'NEO', 'ADS'])]
 
