@@ -49,7 +49,7 @@ embmx <- function(frm) {
   mx
 }
 
-embeddings <- read.csv("scales_openAI_large.csv")
+embeddings <- read.csv("embeddings_openAI_large_de.csv")
 
 library(dplyr)
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
@@ -84,11 +84,11 @@ ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) + geom_point(shape=21) +
 This is as expected, except for conscientiousness. Here, we can show that with lower semantic distance the associations diverge into two groups.
 
 ```{r, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Gewissenhaftigkeit"), 
+ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
        aes(cosdist, corrs)) + 
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Gewissenhaftigkeit", cosdist < 0.95 | corrs < -0.4), 
+  geom_text(data = filter(cordata, typeNEO == "Conscientiuosness", cosdist < 0.95 | corrs < -0.4), 
             aes(label = typePID), alpha = 0.3) +
   theme_classic()
 
@@ -112,11 +112,11 @@ ggplot(filter(cordata, typeNEO == "Extraversion"),
 Agreableness, in contrast, presents a weak and less specific negative association with the PID traits, with some stronger associations with manipulativeness and deceitfulness.
 
 ```{r, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Verträglichkeit"), 
+ggplot(filter(cordata, typeNEO == "Agreeableness"), 
        aes(cosdist, corrs)) + 
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Verträglichkeit", cosdist < 0.99, corrs < -0.2), 
+  geom_text(data = filter(cordata, typeNEO == "Agreeableness", cosdist < 0.99, corrs < -0.2), 
             aes(label = typePID), alpha = 0.3) +
   theme_classic()
 
@@ -125,11 +125,11 @@ ggplot(filter(cordata, typeNEO == "Verträglichkeit"),
 Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
 
 ```{r, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Offenheit"), 
+ggplot(filter(cordata, typeNEO == "Openness"), 
        aes(cosdist, corrs)) + 
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Offenheit", corrs < -0.2), 
+  geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
             aes(label = typePID), alpha = 0.3) +
   theme_classic()
 
@@ -138,11 +138,11 @@ ggplot(filter(cordata, typeNEO == "Offenheit"),
 We can identify the NEO items that are responsible for these associations:
 
 ```{r, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Offenheit"), 
+ggplot(filter(cordata, typeNEO == "Openness"), 
        aes(cosdist, corrs)) + 
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Offenheit", corrs < -0.2), 
+  geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
             aes(label = itemNEO), alpha = 0.3) +
   theme_classic()
 
