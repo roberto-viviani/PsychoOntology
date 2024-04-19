@@ -7,21 +7,19 @@ import pandas as pd
 from haystack.components.embedders import HuggingFaceTEITextEmbedder
 from haystack.utils import Secret
 
-data = pd.read_csv('scales.csv', encoding='unicode_escape')
-# select rows of data where scaleID is either 'PDS', 'NEO', or 'ADS'
-data = data[data['scaleID'].isin(['PID', 'NEO', 'ADS'])]
-
 # check if the 'embeddings_roberta_de.csv' file exists
 if os.path.exists('embeddings_roberta_de.csv'):
     # raise error if the file exists
-    raise FileExistsError('The file embeddings_roberta_de.csv already exists. Please remove it before running this script again.')
+    raise FileExistsError('The file embeddings_roberta_de.csv ' + 
+        'already exists. Please remove it before running this script again.')
 
+data = pd.read_csv('scales.csv', encoding='unicode_escape')
 
-# if there is a column 'polarity', drop column 'polarity' from dataframe data
-if 'polarity' in data.columns:
-    data = data.drop(columns=['polarity'])
-data = data.rename(columns={'item_de': 'item'})
-data = data.drop(columns=['item_en'])
+# if the scales items are language specific, rename the column to 
+# 'item' and drop the other language column
+if 'item_de' in data.columns:
+    data = data.rename(columns={'item_de': 'item'})
+    data = data.drop(columns=['item_en'])
 
 # retrieve embeddings from roberta from hugging face
 text_embedder = HuggingFaceTEITextEmbedder(

@@ -20,12 +20,9 @@ def openAiEmbeddings(items, model_name="text-embedding-3-small"):
     return embeddings
 
 
-data = pd.read_csv('scales.csv', encoding='unicode_escape')
+data = pd.read_csv('scales.csv')
+# additional check on the scales converted here
 data = data[data['scaleID'].isin(['PID', 'NEO', 'ADS'])]
-
-# if there is a column 'polarity', drop column 'polarity' from dataframe data
-if 'polarity' in data.columns:
-    data = data.drop(columns=['polarity'])
 
 # retrieve embeddings from openAI small model
 data['embedding'] = openAiEmbeddings(data['item_de'], "text-embedding-3-small")
