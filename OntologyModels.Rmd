@@ -192,9 +192,11 @@ Consc = mean(rowSums(cdist[NEO$type == "Conscientiousness",]) / 36)
 
 affinities <- data.frame(NEO = c("Neuroticism", "Extraversion", "Openness", "Agreeableness", "Conscientiousness"), correlations = as.vector(scales_correlations), semantic_affinity = as.vector(as.matrix(semantic_affinity)))
 
-ggplot(affinities, aes(semantic_affinity, abs(correlations))) + geom_point() + 
-  geom_smooth(method = "lm", se = F) + geom_text(aes(x = semantic_affinity + 0.005, label = NEO)) + 
-  xlab("Semantic affinity") + ylab("Abs. correlation NEO with PID sum") + 
+ggplot(affinities, aes(semantic_affinity, abs(correlations))) + 
+  geom_point(aes(color = NEO), size = 6) + 
+  geom_smooth(method = "lm", se = F) + 
+  geom_text(aes(x = semantic_affinity + 0.005, y = abs(correlations) - 0.02, label = NEO)) + 
+  xlab("Semantic distance") + ylab("Abs. correlation NEO scale with PID total") + 
   theme_classic()
 ```
 
