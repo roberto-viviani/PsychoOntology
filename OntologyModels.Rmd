@@ -58,6 +58,32 @@ NEOmx <- embmx(NEO)
 PIDmx <- embmx(PID)
 rm(embeddings)
 
+traits = c(
+    "emotional lability" = "NegativeAffect",
+    "anxiousness" = "NegativeAffect",
+    "anxiety" = "NegativeAffect",
+    "separation insecurity" = "NegativeAffect",
+    "withdrawal" = "Detachment",
+    "intimacy avoidance" = "Detachment",
+    "intimicy avoidance" = "Detachment",
+    "anhedonia" = "Detachment",
+    "manipulativeness" = "Antagonism",
+    "deceitfulness" = "Antagonism",
+    "grandiosity" = "Antagonism",
+    "irresponsibility" = "Disinhibition",
+    "impulsivity" = "Disinhibition",
+    "distractibility" = "Disinhibition",
+    "eccentricity" = "Psychoticism",
+    "eccentrictiy" = "Psychoticism",
+    "perceptual dysregulation" = "Psychoticism",
+    "perceptual dysreg" = "Psychoticism",
+    "unusual beliefs" = "Psychoticism",
+    "perfectionism" = "Anancasticity",
+    "rigid perfectionism" = "Anancasticity",
+    "rigidity" = "Anancasticity",
+    "orderliness" = "Anancasticity"
+)
+
 scales <- read.csv("scales_data.csv")
 cdist <- crossdist(NEOmx, PIDmx)
 cormx <- cor(as.matrix(scales |> select(starts_with("NEO"))), 
@@ -65,6 +91,7 @@ cormx <- cor(as.matrix(scales |> select(starts_with("NEO"))),
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
                       typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
                       itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
+cordata$traitPID <- traits[cordata$typePID]
 
 ```
 
@@ -79,7 +106,32 @@ ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) + geom_point(shape=21) +
 
 ```
 
-This is as expected, except for conscientiousness. Here, we can show that with lower semantic distance the associations diverge into two groups.
+One question that naturally arises is the extent to which semantic similarity explains the correlation between scales. The average correlation between NEO and PID scales, computed from the correlation of the items, is
+
+```{r, message = FALSE}
+ggplot(
+  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
+  aes(y = corr, x = typeNEO, fill = traitPID, group = traitPID)) + 
+  geom_col(position = "dodge", alpha = 0.8) +
+  xlab("NEO scale") + ylab("avg correlation") + theme_classic()
+```
+
+To see how much these correlations are explained by semantic relatedness, we plot their absolute value on semantic relatedness.
+
+```{r, message = FALSE}
+ggplot(
+  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = abs(corr), x = dist)) + 
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(method = "lm", alpha = 0.2) + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+```
+
+In general, the closer the semantic relatedness of items of the respective subscales and traits, the stronger the correlations in the answers of participants. We also see that the strongest correlation, given by neuroticism and negative affect, was also accompanied by a short semantic distance between the items of the respective scales. However, the amount of correlation is higher than we would expent from a linear prediction from the amount of semantic relatedness. We can see also that conscientiousness departs from this pattern. However, the semantic construct implied by the conscientiousness items appears to be heterogeneous.
+
+## Association of individual NEO items
+
+For conscientiusness, we can show that with lower semantic distance the associations diverge into two groups.
 
 ```{r conscientiousness, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
