@@ -121,13 +121,18 @@ We see here the pattern of a positive association between neuroticism and PID sc
 
 To see how much these correlations are explained by semantic relatedness, we plot their absolute value on semantic relatedness.
 
-```{r, message = FALSE}
+```{r, message = FALSE, warning = FALSE}
 ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
   aes(y = abs(corr), x = dist)) + 
   geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
-  geom_smooth(method = "lm", alpha = 0.2, color = "darkgrey") + 
+  geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
+    alpha = 0.2, color = "darkgrey") + 
   xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+
+summary(glm(abs(corr) ~ dist, 
+            data = cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)), 
+            family = quasibinomial))
 ```
 
 In general, the closer the semantic relatedness of items of the respective subscales and traits, the stronger the correlations in the answers of participants. We also see that the strongest correlation, given by neuroticism and negative affect, was also accompanied by a short semantic distance between the items of the respective scales. However, the amount of correlation is higher than we would expect from a linear prediction from the amount of semantic relatedness. We can see also that conscientiousness departed from this pattern. However, the semantic construct implied by the conscientiousness items appears to be heterogeneous. As described in the literature, openness to experience was not related to PID dimensions. We see that in both its large semantic distance and low correlation with total PID scores.
