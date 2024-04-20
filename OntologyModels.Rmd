@@ -58,6 +58,7 @@ NEOmx <- embmx(NEO)
 PIDmx <- embmx(PID)
 rm(embeddings)
 
+# some traits are misspelled in the original dataset, correction here
 traits = c(
     "emotional lability" = "NegativeAffect",
     "anxiousness" = "NegativeAffect",
@@ -116,6 +117,8 @@ ggplot(
   xlab("NEO scale") + ylab("avg correlation") + theme_classic()
 ```
 
+We see here the pattern of a positive association between neuroticism and PID scores, and a negative association of all other NEO scales, with the exception of openness to experience that had no association. Conscientiousness is another exception to this pattern because of the opposite associations with anancasticity and disinhibition.
+
 To see how much these correlations are explained by semantic relatedness, we plot their absolute value on semantic relatedness.
 
 ```{r, message = FALSE}
@@ -123,11 +126,11 @@ ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
   aes(y = abs(corr), x = dist)) + 
   geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
-  geom_smooth(method = "lm", alpha = 0.2) + 
+  geom_smooth(method = "lm", alpha = 0.2, color = "darkgrey") + 
   xlab("semantic distance") + ylab("avg correlation") + theme_classic()
 ```
 
-In general, the closer the semantic relatedness of items of the respective subscales and traits, the stronger the correlations in the answers of participants. We also see that the strongest correlation, given by neuroticism and negative affect, was also accompanied by a short semantic distance between the items of the respective scales. However, the amount of correlation is higher than we would expent from a linear prediction from the amount of semantic relatedness. We can see also that conscientiousness departs from this pattern. However, the semantic construct implied by the conscientiousness items appears to be heterogeneous.
+In general, the closer the semantic relatedness of items of the respective subscales and traits, the stronger the correlations in the answers of participants. We also see that the strongest correlation, given by neuroticism and negative affect, was also accompanied by a short semantic distance between the items of the respective scales. However, the amount of correlation is higher than we would expect from a linear prediction from the amount of semantic relatedness. We can see also that conscientiousness departed from this pattern. However, the semantic construct implied by the conscientiousness items appears to be heterogeneous. As described in the literature, openness to experience was not related to PID dimensions. We see that in both its large semantic distance and low correlation with total PID scores.
 
 ## Association of individual NEO items
 
@@ -215,40 +218,3 @@ ggplot(filter(cordata, typeNEO == "Openness"),
 ```
 
 NEOFFI53, which shows the most negative correlations with PID28 and PID10, is the text I have a lot of intellectual curiosity" ("Ich bin sehr wissbegierig"). The correlated anhedonia PID items are "I rarely get enthusiastic about anything" ("Ich bin selten von irgendetwas begeistert") and "Nothing seems to interest me very much" ("Nichts scheint mich wirklich zu interessieren"). Here, the notion of intellectual curiosity appears to have been coded as being distinct from general enthusiasm and interest by the language model, but ends up correlating with anhedonia in the responses of participants.
-
-Below, we plot the sample correlation of each NEO subscale with the total PID score on the average semantic distance with PID items. Because this correlation may be positive or negative (depending on the direction in which NEO subscales code), we used absolute values. One can see that the correlation between the NEO scores and the total PID scores across participants was larger when the average semantic distance to the PID items is smaller. As expected, the largest correlation accrued to the neuroticism scale. As described in the literature, openness to experience is not related to PID dimensions. We see that in both its large semantic distance and low correlation with total PID scores. The amount of correlation of consciontiousness is dominated by the perfectionism items.
-
-```{r, message = FALSE}
-NEOneurofld <- NEO |> filter(type == "Neuroticism") |> select(itemID)
-NEOextrafld <- NEO |> filter(type == "Extraversion") |> select(itemID)
-NEOopennfld <- NEO |> filter(type == "Openness") |> select(itemID)
-NEOagreefld <- NEO |> filter(type == "Agreeableness") |> select(itemID)
-NEOconscfld <- NEO |> filter(type == "Conscientiousness") |> select(itemID)
-subscales <- data.frame(subjectID = scales$subjectID)
-subscales$Neuro <- rowSums(select(scales, NEOneurofld$itemID))
-subscales$Extra <- rowSums(select(scales, NEOextrafld$itemID))
-subscales$Openn <- rowSums(select(scales, NEOopennfld$itemID))
-subscales$Agree <- rowSums(select(scales, NEOagreefld$itemID))
-subscales$Consc <- rowSums(select(scales, NEOconscfld$itemID))
-subscales$PID <- rowSums(select(scales, starts_with("PID")))
-
-scales_correlations <- cor(subscales$PID, select(subscales, -PID, -subjectID))
-
-semantic_affinity = data.frame(
-Neuro = mean(rowSums(cdist[NEO$type == "Neuroticism",]) / 36),
-Extra = mean(rowSums(cdist[NEO$type == "Extraversion",]) / 36),
-Openn = mean(rowSums(cdist[NEO$type == "Openness",]) / 36),
-Agree = mean(rowSums(cdist[NEO$type == "Agreeableness",]) / 36),
-Consc = mean(rowSums(cdist[NEO$type == "Conscientiousness",]) / 36)
-)
-
-affinities <- data.frame(NEO = c("Neuroticism", "Extraversion", "Openness", "Agreeableness", "Conscientiousness"), correlations = as.vector(scales_correlations), semantic_affinity = as.vector(as.matrix(semantic_affinity)))
-
-ggplot(affinities, aes(semantic_affinity, abs(correlations))) + 
-  geom_point(aes(color = NEO), size = 6) + 
-  geom_smooth(method = "lm", se = F) + 
-  geom_text(aes(x = semantic_affinity + 0.005, y = abs(correlations) - 0.02, label = NEO)) + 
-  xlab("Semantic distance") + ylab("Abs. correlation NEO scale with PID total") + 
-  theme_classic()
-```
-
