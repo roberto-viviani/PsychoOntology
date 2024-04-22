@@ -1,0 +1,112 @@
+---
+title: "Models comparison"
+author: "Roberto"
+date: "2024-04-22"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(smacof)
+
+embmx <- function(frm) {
+  mx = matrix(nrow = nrow(frm), ncol = 3072)
+  for (count in 1 : nrow(frm)) {
+    eb <- frm[count,"embedding"]
+    em <- sub("\\[", "c\\(", eb)
+    em <- sub("\\]", "\\)", em)
+    c <- eval(str2expression(em))
+    mx[count,] <- c
+  }
+  mx
+}
+
+embeddings <- read.csv("embeddings_openAI_small_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+NEOmx_openAI <- embmx(NEO)
+PIDmx_openAI <- embmx(PID)
+
+embeddings <- read.csv("embeddings_roberta_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+NEOmx_roberta <- embmx(NEO)
+PIDmx_roberta <- embmx(PID)
+
+embeddings <- read.csv("embeddings_mistral_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+NEOmx_mistral <- embmx(NEO)
+PIDmx_mistral <- embmx(PID)
+
+# some traits are misspelled in the original dataset, correction here
+traits <- c(
+    "emotional lability" = "NegativeAffect",
+    "anxiousness" = "NegativeAffect",
+    "anxiety" = "NegativeAffect",
+    "separation insecurity" = "NegativeAffect",
+    "withdrawal" = "Detachment",
+    "intimacy avoidance" = "Detachment",
+    "intimicy avoidance" = "Detachment",
+    "anhedonia" = "Detachment",
+    "manipulativeness" = "Antagonism",
+    "deceitfulness" = "Antagonism",
+    "grandiosity" = "Antagonism",
+    "irresponsibility" = "Disinhibition",
+    "impulsivity" = "Disinhibition",
+    "distractibility" = "Disinhibition",
+    "eccentricity" = "Psychoticism",
+    "eccentrictiy" = "Psychoticism",
+    "perceptual dysregulation" = "Psychoticism",
+    "perceptual dysreg" = "Psychoticism",
+    "unusual beliefs" = "Psychoticism",
+    "perfectionism" = "Anancasticity",
+    "rigid perfectionism" = "Anancasticity",
+    "rigidity" = "Anancasticity",
+    "orderliness" = "Anancasticity"
+)
+ 
+scales <- read.csv("scales_data.csv") |> tidyr::drop_na()
+getcordata <- function(cdist) {
+  cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
+      as.matrix(scales |> select(starts_with("PID5BF"))))
+  cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
+                        typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
+                        itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
+  cordata$traitPID <- traits[cordata$typePID]
+  cordata
+}
+
+cordata_openAI  <- getcordata(crossdist(NEOmx_openAI, PIDmx_openAI))
+cordata_roberta <- getcordata(crossdist(NEOmx_roberta, PIDmx_roberta))
+cordata_mistral <- getcordata(crossdist(NEOmx_mistral, PIDmx_mistral))
+
+```
+
+## Averaging models
+
+```{r}
+distmx <- crossdist(NEOmx_openAI, PIDmx_openAI)
+prtr1 <- Procrustes(distmx, crossdist(NEOmx_roberta, PIDmx_roberta))
+prtr2 <- Procrustes(distmx, crossdist(NEOmx_mistral, PIDmx_mistral))
+distmx_pooled <- (distmx + prtr1$Yhat + prtr2$Yhat) / 3
+
+cordata_pooled <- getcordata(distmx_pooled)
+```
+
+```{r, message = FALSE, warning = FALSE}
+ggplot(
+  cordata_pooled |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = abs(corr), x = dist)) + 
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
+    alpha = 0.2, color = "darkgrey") + 
+  labs(color = "NEO scale", shape = "PID trait") + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+
+summary(glm(abs(corr) ~ dist, 
+            data = cordata_pooled |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)), 
+            family = quasibinomial))
+```
