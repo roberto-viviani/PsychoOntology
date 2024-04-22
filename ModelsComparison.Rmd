@@ -5,6 +5,8 @@ date: "2024-04-22"
 output: word_document
 ---
 
+We test the extent to which semantic similarity predicts the respondent correlation of anwers across subscales using different large language models.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
@@ -22,24 +24,6 @@ embmx <- function(frm) {
   }
   mx
 }
-
-embeddings <- read.csv("embeddings_openAI_small_de.csv")
-NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
-PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-NEOmx_openAI <- embmx(NEO)
-PIDmx_openAI <- embmx(PID)
-
-embeddings <- read.csv("embeddings_roberta_de.csv")
-NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
-PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-NEOmx_roberta <- embmx(NEO)
-PIDmx_roberta <- embmx(PID)
-
-embeddings <- read.csv("embeddings_mistral_de.csv")
-NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
-PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-NEOmx_mistral <- embmx(NEO)
-PIDmx_mistral <- embmx(PID)
 
 # some traits are misspelled in the original dataset, correction here
 traits <- c(
@@ -79,34 +63,98 @@ getcordata <- function(cdist) {
   cordata
 }
 
-cordata_openAI  <- getcordata(crossdist(NEOmx_openAI, PIDmx_openAI))
-cordata_roberta <- getcordata(crossdist(NEOmx_roberta, PIDmx_roberta))
-cordata_mistral <- getcordata(crossdist(NEOmx_mistral, PIDmx_mistral))
+# plot function
+plotfunc <- function(data) {
+  ggplot(
+    data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+    aes(y = abs(corr), x = dist)) + 
+    geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+    geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
+      alpha = 0.2, color = "darkgrey") + 
+    labs(color = "NEO scale", shape = "PID trait") + 
+    xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+}
+
+# model and inference
+testfunc <- function(data) {
+  summary(glm(abs(corr) ~ dist, 
+    data = data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),             family = quasibinomial))
+}
 
 ```
 
-## Averaging models
+## OpenAI, small vector embeddings
 
-```{r}
-distmx <- crossdist(NEOmx_openAI, PIDmx_openAI)
-prtr1 <- Procrustes(distmx, crossdist(NEOmx_roberta, PIDmx_roberta))
-prtr2 <- Procrustes(distmx, crossdist(NEOmx_mistral, PIDmx_mistral))
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_openAI_small_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+## Mistral
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_mistral_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+## Roberta
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_roberta_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+### Comparison models
+
+The comparison reveals that openAI is the best model, followed by roberta and finally by mistral.
+
+## Averaged models
+
+We look at whether performance can be improved by combining the information from models.
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_openAI_small_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_openAI <- crossdist(embmx(NEO), embmx(PID))
+
+embeddings <- read.csv("embeddings_mistral_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_mistral <- crossdist(embmx(NEO), embmx(PID))
+
+embeddings <- read.csv("embeddings_roberta_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_roberta <- crossdist(embmx(NEO), embmx(PID))
+
+prtr1 <- Procrustes(distmx_openAI, distmx_mistral)
+prtr2 <- Procrustes(distmx_openAI, distmx_roberta)
 distmx_pooled <- (distmx + prtr1$Yhat + prtr2$Yhat) / 3
 
 cordata_pooled <- getcordata(distmx_pooled)
+plotfunc(cordata_pooled)
+testfunc(cordata_pooled)
+rm(list = c("embeddings", "NEO", "PID", "distmx_openAI", "distmx_mistral", 
+     "distmx_roberta", "prtr1", "prtr2", "cordata_pooled"))
 ```
 
-```{r, message = FALSE, warning = FALSE}
-ggplot(
-  cordata_pooled |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
-  aes(y = abs(corr), x = dist)) + 
-  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
-  geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
-    alpha = 0.2, color = "darkgrey") + 
-  labs(color = "NEO scale", shape = "PID trait") + 
-  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
-
-summary(glm(abs(corr) ~ dist, 
-            data = cordata_pooled |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)), 
-            family = quasibinomial))
-```
+This reveals that the average model performs between the best and the worst model. There appears no advantage in pooling the infromation acrss models; the best model is better than other combinations.
