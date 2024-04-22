@@ -122,13 +122,26 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+## all-mpnet-base-v2
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_mpnetbasev2_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
 ### Comparison models
 
 The comparison reveals that openAI is the best model, followed by roberta and finally by mistral.
 
 ## Averaged models
 
-We look at whether performance can be improved by combining the information from models.
+We look at whether performance can be improved by combining the information from models. We do not use mpnet because it performs poorly, but include mistral as it may provide different information.
 
 ```{r, message = FALSE, warning = FALSE}
 embeddings <- read.csv("embeddings_openAI_small_de.csv")
