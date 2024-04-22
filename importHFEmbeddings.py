@@ -22,6 +22,7 @@ if os.path.exists('embeddings_roberta_de.csv'):
         'already exists. Please remove it before running this script again.')
 
 # retrieve embeddings from roberta from hugging face
+# https://huggingface.co/sentence-transformers/all-roberta-large-v1
 text_embedder = HuggingFaceTEITextEmbedder(
     model="sentence-transformers/all-roberta-large-v1", 
     token=Secret.from_token(os.environ['HF_API_KEY'])
