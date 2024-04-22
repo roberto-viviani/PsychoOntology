@@ -59,7 +59,7 @@ PIDmx <- embmx(PID)
 rm(embeddings)
 
 # some traits are misspelled in the original dataset, correction here
-traits = c(
+traits <- c(
     "emotional lability" = "NegativeAffect",
     "anxiousness" = "NegativeAffect",
     "anxiety" = "NegativeAffect",
@@ -84,15 +84,16 @@ traits = c(
     "rigidity" = "Anancasticity",
     "orderliness" = "Anancasticity"
 )
-
-scales <- read.csv("scales_data.csv")
+ 
+scales <- read.csv("scales_data.csv") |> tidyr::drop_na()
 cdist <- crossdist(NEOmx, PIDmx)
-cormx <- cor(as.matrix(scales |> select(starts_with("NEO"))), 
-    as.matrix(scales |> select(starts_with("PID"))))
+cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
+    as.matrix(scales |> select(starts_with("PID5BF"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
                       typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
                       itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
 cordata$traitPID <- traits[cordata$typePID]
+rm(cormx)
 
 ```
 
