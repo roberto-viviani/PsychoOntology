@@ -108,6 +108,7 @@ ggplot(
   labs(fill = "PID trait") + 
   xlab("NEO scale") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+#ggsave("NEOxPID.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
@@ -132,6 +133,7 @@ ggplot(
     alpha = 0.2, color = "darkgrey") + 
   labs(color = "NEO scale", shape = "PID trait") + 
   xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+#ggsave("subscales_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 summary(glm(abs(corr) ~ dist, 
             data = cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)), 

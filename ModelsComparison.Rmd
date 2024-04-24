@@ -92,6 +92,7 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
+#ggsave("subscales_openAI_small.pdf", width = 150, height = 95, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -105,6 +106,7 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
+#ggsave("subscales_mistral.pdf", width = 150, height = 95, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -118,6 +120,7 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
+#ggsave("subscales_roberta_small.pdf", width = 150, height = 95, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -148,6 +151,7 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
+#ggsave("subscales_univSentEnc.pdf", width = 150, height = 95, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
