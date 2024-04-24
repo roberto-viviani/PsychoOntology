@@ -5,7 +5,7 @@ date: "2024-04-22"
 output: word_document
 ---
 
-We test the extent to which semantic similarity predicts the respondent correlation of anwers across subscales using different large language models.
+We test the extent to which semantic similarity predicts the respondent correlation of answers across subscales using different large language models.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -124,6 +124,8 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 
 ## all-mpnet-base-v2
 
+Like Roberta, this is a freely available model.
+
 ```{r, message = FALSE, warning = FALSE}
 embeddings <- read.csv("embeddings_mpnetbasev2_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
@@ -134,6 +136,23 @@ plotfunc(cordata)
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
+
+## Universal Sentence Encoder
+
+Universal Sentence Encoder embeddings are not based on a language model and are publicly available on the TernsorFlow site.
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crossdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+The performance of this modest is the lowest among all considered models.
 
 ### Comparison models
 
