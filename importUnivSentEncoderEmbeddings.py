@@ -1,5 +1,5 @@
 """
-    Imports Universal Sentence Encoder embeddings into the embeddings. This function should be run only once.
+    Imports Universal Sentence Encoder embeddings. This function should be run only once.
 """
 import pandas as pd
 import tensorflow_hub as hub
