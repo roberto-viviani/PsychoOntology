@@ -156,7 +156,7 @@ ggplot(filter(cordata, typeNEO == "Extraversion"),
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Extraversion", 
-                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+                          (cosdist < 0.55 & corrs > 0) | corrs < -0.5), 
             aes(label = typePID), alpha = 0.3) +
   labs(title = "Extraversion") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
@@ -171,7 +171,7 @@ ggplot(filter(cordata, typeNEO == "Extraversion"),
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Extraversion", 
-                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+                          (cosdist < 0.55 & corrs > 0) | corrs < -0.5), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
   labs(title = "Extraversion") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
@@ -179,6 +179,8 @@ ggplot(filter(cordata, typeNEO == "Extraversion"),
 ```
 
 A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
+
+There were also items that the model gave relatively large semantic distances but obtained strong correlations in the participant's responses. This concerned NEOFFI17 "I really enjoy talking to people" ("Ich unterhalte mich wirklich gerne mit anderen Menschen"), which obtained a negative correlation with PID5BF04 withdrawal, "I keep my distance from people" ("Ich halte Abstand zu Menschen") and PID5BF22 withdrawal, "I don’t like spending time with others" ("Ich mag es nicht, Zeit mit anderen zu verbringen").
 
 ### Conscientiousness
 

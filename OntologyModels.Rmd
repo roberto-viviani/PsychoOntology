@@ -89,16 +89,18 @@ library(ggplot2)
 ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "lm", se = F, alpha = 0.5) + 
   geom_point(shape=21) +
-  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 60) + 
+  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 65) + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
               se = F) + 
   geom_point(shape=21) +
-  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 60) + 
+  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 65) + 
   #scale_color_brewer(type = "qual", palette = 6, direction = -1) +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -110,7 +112,77 @@ The second plot considers the absolute values of the correlations, to eliminate 
 
 To obtain insight on the items driving these associations, we turn to examining each NEO subscale in turn, avoiding the excessive clutter from the large number of item pairs.
 
-For conscientiusness, we can show that with lower semantic distance the associations diverge into two groups.
+### Neuroticism
+
+```{r neuroticism, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Neuroticism"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.43 | corrs > 0.5), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Neuroticism") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+The items that drove the association between neuroticism and PID scores were primarily those of the PID facet anxiety, with some contribution from anhedonia. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants.
+
+We now identify the items that make up this and other pairs with large associations.
+
+```{r neuroticism_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Neuroticism"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.43 | corrs > 0.5), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
+  labs(title = "Neuroticism") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item is PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"). In the plot, one can see that other emotional lability items intermixed with anhedonia items to give moderate associations with neuroticism.
+
+There were also item pairs that the language model considered similar, but gave not correlation in the participant responses. The first pair was NEOFFI06 and PID5BF32 (grandiosity). The neuroticism item is "I often feel inferior to others" ("Ich fühle mich anderen oft unterlegen"), and the PID grandiosity item is "I often have to deal with people who are less important than me" ("Ich muss mich oft mit Leuten beschäftigen, die weniger wichtig sind als ich"). The language model here appears to have failed to code the difference between superiority/inferiority as a self-perception and as judgement of others. The other pair again included NEOFFI06, this time paired with PID5BF20 (manipulativeness), "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen"). The semantic similarity of these items appears to be coded too high by the language model.
+
+### Extraversion
+
+Extraversion appears to be characterized by the selective negative association of some items with anhedonia, anxiety, and withdrawal. We see the lower part of the plot, containing negative associations, being occupied by these items. 
+
+```{r extraversion, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Extraversion"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
+                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Extraversion") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+However, the language model also detected a few semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
+
+```{r extraversion_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Extraversion"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
+                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
+  labs(title = "Extraversion") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
+
+### Conscientiousness
+
+For conscientiousness, we can show that with lower semantic distance the associations diverge into two groups.
 
 ```{r conscientiousness, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
@@ -119,6 +191,7 @@ ggplot(filter(cordata, typeNEO == "Conscientiousness"),
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
             aes(label = typePID), alpha = 0.3) +
+  labs(title = "Conscientiousness") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 
 ```
@@ -141,20 +214,7 @@ ggplot(filter(cordata, typeNEO == "Conscientiousness"),
 
 NEO item 60 is "I strive for excellence in everything I do" (Bei allem, was ich tue, strebe ich nach Perfektion"). This ends up correlated with responses on "I keep approaching things the same way, even when it isn’t working" ("Auch wenn es andere zum Wahnsinn treibt, bestehe ich darauf, alles perfekt zu machen") and "I get stuck on one way of doing things, even when it’s clear it won’t work" ("Ich versuche Dinge weiter zu perfektionieren, auch wenn ich sie wahrscheinlich schon so gut wie möglich hinbekommen habe"). The differences in meaning between the German and English version are enough to produce different results in the semantic analysis: here, the notion of perfectionism drives a semantic association that is absent in the original English language (see Ontology.ipynb).
 
-Extraversion, by contrast, appears to be so sparsely distributed because of the selective negative association of some items with anhedonia, anxiety, and withdrawal. Here, the language model detected semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
-
-```{r extraversion, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Extraversion"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
-                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
-            aes(label = typePID), alpha = 0.3) +
-  labs(title = "Extraversion") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-
-```
+### Agreeableness
 
 Agreableness, in contrast, presents a weak and less specific negative association with the PID traits, with some stronger associations with manipulativeness and deceitfulness.
 
@@ -169,6 +229,8 @@ ggplot(filter(cordata, typeNEO == "Agreeableness"),
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 
 ```
+
+### Openness to experience
 
 Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
 
