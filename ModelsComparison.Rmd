@@ -70,7 +70,7 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_openAI_small.pdf", width = 150, height = 95, units = "mm")
+#ggsave("subscales_gecko.pdf", width = 150, height = 95, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -120,7 +120,7 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 
 ## Universal Sentence Encoder
 
-Universal Sentence Encoder embeddings are not based on a language model and are publicly available on the TernsorFlow site.
+Universal Sentence Encoder embeddings are not based on a language model and are publicly available on the TensorFlow site.
 
 ```{r, message = FALSE, warning = FALSE}
 embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
