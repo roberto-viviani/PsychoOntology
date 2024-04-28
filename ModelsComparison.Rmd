@@ -61,6 +61,20 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+## Gecko
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_gecko_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+#ggsave("subscales_openAI_small.pdf", width = 150, height = 95, units = "mm")
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
 ## Mistral
 
 ```{r, message = FALSE, warning = FALSE}
