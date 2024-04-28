@@ -1,0 +1,273 @@
+---
+title: "Ontology Models"
+author: "Roberto Viviani, University of Innsbruck"
+date: "2024-04-18"
+output: word_document
+---
+
+```{r setup, echo=FALSE, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.dim = c(8,5.2))
+library(ggplot2)
+library(dplyr)
+
+# utilities to decode embeddings
+source("embedding_utilities.R") 
+
+embeddings <- read.csv("embeddings_openAI_large_en.csv")
+
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+NEOmx <- embmx(NEO)
+PIDmx <- embmx(PID)
+rm(embeddings)
+
+scales <- read.csv("scales_data.csv") |> tidyr::drop_na()
+cdist <- crcosdist(NEOmx, PIDmx)
+cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
+    as.matrix(scales |> select(starts_with("PID5BF"))))
+cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
+                      typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
+                      itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
+cordata$traitPID <- traits[cordata$typePID]
+rm(cormx)
+
+```
+
+The question that naturally arises is the extent to which semantic similarity explains the correlation between scales. The average correlation between NEO and PID scales, computed from the correlation of the items, is shown in the following figures.
+
+```{r, message = FALSE}
+ggplot(
+  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
+  aes(y = corr, x = typeNEO, fill = traitPID, group = traitPID)) + 
+  geom_col(position = "dodge", alpha = 0.8, color = "white") +
+  scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
+  labs(fill = "PID trait") + 
+  xlab("NEO scale") + ylab("avg correlation") + theme_grey() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+#ggsave("NEOxPID.pdf", width = 150, height = 95, units = "mm")
+
+ggplot(
+  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
+  aes(y = corr, x = traitPID, fill = typeNEO)) + 
+  geom_col(position = "dodge", alpha = 0.8, color = "white") +
+  labs(fill = "NEO scale") + 
+  xlab("PID trait") + ylab("avg correlation") + theme_grey() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+```
+
+We see here the pattern of a positive association between neuroticism and PID scores, and a negative association of all other NEO scales, with the exception of openness to experience that had no association, except to psychoticism. Conscientiousness is another exception to this pattern because of the diverging associations with anancasticity (positive) and disinhibition (negative).
+
+To see how much these correlations are explained by semantic relatedness, we plotted their absolute value on semantic relatedness (we used the absolute value to redress the issue of the differing polarity of the NEO subscales).
+
+```{r, message = FALSE, warning = FALSE}
+ggplot(
+  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = abs(corr), x = dist)) + 
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
+    alpha = 0.2, color = "darkgrey") + 
+  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 50) + 
+  labs(color = "NEO scale", shape = "PID trait") + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+#ggsave("subscales_openAI_large.pdf", width = 150, height = 95, units = "mm")
+
+summary(glm(abs(corr) ~ dist, 
+            data = cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)), 
+            family = quasibinomial))
+```
+
+In general, the closer the semantic relatedness of items of the respective subscales and traits, the stronger the correlations in the answers of participants (t = -5.5, p < 0.001). We also see that the strongest correlation, given by neuroticism and negative affect, was also accompanied by a short semantic distance between the items of the respective scales. However, the amount of correlation is somewhat higher than we would expect from a linear prediction from the amount of semantic relatedness. We can see also that conscientiousness departed from this pattern. However, the semantic construct implied by the conscientiousness items appears to be heterogeneous. As described in the literature, openness to experience was not related to PID dimensions. We see that in both its large semantic distance and low correlation with total PID scores.
+
+## Association of individual items in the NEO subscales
+
+In the following plots, we display the correlation of pairs of individual items on the cosine distance of embeddings to visualize the relation between semantic relatedness and correlation at a smaller level of granualarity. We use color to differentiate the PID facets, and plot the relationship between pairs with curves grouped by NEO subscales (which have different directions).
+
+```{r embed_x_corr, message = FALSE }
+
+library(ggplot2)
+ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "lm", se = F, alpha = 0.5) + 
+  geom_point(shape=21) +
+  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 65) + 
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
+
+ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
+              se = F) + 
+  geom_point(shape=21) +
+  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 65) + 
+  #scale_color_brewer(type = "qual", palette = 6, direction = -1) +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
+
+```
+
+To interpret these plots it is important to remember that each point represents a pair of scale items, one from the NEO inventory and one from the PID scale, from which we take the correlation of responses and the semantic distance. Therefore, as there are 66 NEO items in this database and 36 PID items, there are 66 x 36 = 2376 points in total.
+
+The first plot demonstrates the diverging relationship between semantic distance and response correlations. At low semantic distance, correlations diverged widely due in part to the fact that some have opposite directions. At high semantic distances, in contrast, we see that the correlations narrowed around the zero point.
+
+The second plot considers the absolute values of the correlations, to eliminate the obfuscating role of scale items with similar meaning but opposite polarity. This plot shows the extent to which low semantic distance was associated with varying degrees of association in the participant responses. From the fitted responses (obtained with a logistic binomial regression), however, it is clear that on average correlation increased with low semantic distance. Furthermore, we see that neuroticism displayed the strongest association with semantic similarity, and openness to experience the lowest.
+
+To obtain insight on the items driving these associations, we turn to examining each NEO subscale in turn, avoiding the excessive clutter from the large number of item pairs.
+
+### Neuroticism
+
+```{r neuroticism, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Neuroticism"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.45 | corrs > 0.5), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Neuroticism") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+The items that drove the association between neuroticism and PID scores were primarily those of the PID facet anxiety, with some contribution from anhedonia. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants.
+
+We now identify the items that make up this and other pairs with large associations.
+
+```{r neuroticism_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Neuroticism"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.45), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
+  labs(title = "Neuroticism") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item is PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"). In the plot, one can see that other emotional lability items intermixed with anhedonia items to give moderate associations with neuroticism.
+
+There were also item pairs that the language model considered similar, but gave not correlation in the participant responses. The first pair was NEOFFI06 and PID5BF32 (grandiosity). The neuroticism item is "I often feel inferior to others" ("Ich fühle mich anderen oft unterlegen"), and the PID grandiosity item is "I often have to deal with people who are less important than me" ("Ich muss mich oft mit Leuten beschäftigen, die weniger wichtig sind als ich"). The language model here appears to have failed to code the difference between superiority/inferiority as a self-perception and as judgement of others. The other pair again included NEOFFI06, this time paired with PID5BF20 (manipulativeness), "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen"). The semantic similarity of these items appears to be coded too high by the language model.
+
+### Extraversion
+
+Extraversion appears to be characterized by the selective negative association of some items with anhedonia, anxiety, and withdrawal. We see the lower part of the plot, containing negative associations, being occupied by these items. 
+
+```{r extraversion, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Extraversion"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
+                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Extraversion") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+However, the language model also detected a few semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
+
+```{r extraversion_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Extraversion"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
+                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
+  labs(title = "Extraversion") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
+
+### Conscientiousness
+
+For conscientiousness, we can show that with lower semantic distance the associations diverge into two groups.
+
+```{r conscientiousness, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Conscientiousness") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+The items whose PID semantics drove a positive association with NEO conscientiousness items were those concerning rigidity and perfectionism, which are represented in two PID facets. In contrast, the semantics of the PID facets distractibility and irresponsibility drove the negative association with conscientiousness, meaning individuals who are more conscienscious are less distractable and irresponsible.
+
+We now identify the items in the scale that are responsible for the negative association:
+
+```{r conscientiousness_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
+  labs(title = "Conscientiousness") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+NEO item 60 is "I strive for excellence in everything I do" (Bei allem, was ich tue, strebe ich nach Perfektion"). This ends up correlated with responses on "I keep approaching things the same way, even when it isn’t working" ("Auch wenn es andere zum Wahnsinn treibt, bestehe ich darauf, alles perfekt zu machen") and "I get stuck on one way of doing things, even when it’s clear it won’t work" ("Ich versuche Dinge weiter zu perfektionieren, auch wenn ich sie wahrscheinlich schon so gut wie möglich hinbekommen habe"). The differences in meaning between the German and English version are enough to produce different results in the semantic analysis: here, the notion of perfectionism drives a semantic association that is absent in the original English language (see Ontology.ipynb).
+
+
+```{r conscientiousness_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Conscientiousness", traitPID == "Anancasticity"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
+  #geom_text(aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
+  labs(title = "Conscientiousness") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+### Agreeableness
+
+Agreableness, in contrast, presents a weak and less specific negative association with the PID traits, with some stronger associations with manipulativeness and deceitfulness.
+
+```{r agreeableness, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Agreeableness"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Agreeableness", cosdist < 0.5, corrs < -0.2), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Agreeableness") +  
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
+
+```{r openness, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Openness"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
+            aes(label = typePID), alpha = 0.3) +
+  labs(title = "Openness") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+We can identify the NEO items that are responsible for these associations:
+
+```{r openness_items, message = FALSE}
+ggplot(filter(cordata, typeNEO == "Openness"), 
+       aes(cosdist, corrs)) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_smooth(color = "grey", method = "lm", se = F) + 
+  geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
+            aes(label = paste(itemNEO, itemPID, sep = ":")), alpha = 0.3) +
+  labs(title = "Openness") +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+```
+
+NEOFFI53, which shows the most negative correlations with PID28 and PID10, is the text I have a lot of intellectual curiosity" ("Ich bin sehr wissbegierig"). The correlated anhedonia PID items are "I rarely get enthusiastic about anything" ("Ich bin selten von irgendetwas begeistert") and "Nothing seems to interest me very much" ("Nichts scheint mich wirklich zu interessieren"). Here, the notion of intellectual curiosity appears to have been encoded as being semantically distinct from general enthusiasm and interest by the language model, but ends up correlating with anhedonia in the responses of participants.
