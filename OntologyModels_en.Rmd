@@ -135,7 +135,7 @@ ggplot(filter(cordata, typeNEO == "Neuroticism"),
        aes(cosdist, corrs)) + 
   geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.45), 
+  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.45 | corrs > 0.5), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
   labs(title = "Neuroticism") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
