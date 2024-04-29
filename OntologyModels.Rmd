@@ -12,31 +12,57 @@ library(dplyr)
 
 # utilities to decode embeddings
 source("embedding_utilities.R") 
-
-embeddings <- read.csv("embeddings_openAI_large_de.csv")
-
-NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
-PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-NEOmx <- embmx(NEO)
-PIDmx <- embmx(PID)
-rm(embeddings)
+embeddings <- loadEmbeddings("embeddings_openAI_large_de.csv")
 
 scales <- read.csv("scales_data.csv") |> tidyr::drop_na()
-cdist <- crcosdist(NEOmx, PIDmx)
 cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
     as.matrix(scales |> select(starts_with("PID5BF"))))
-cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
-                      typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
-                      itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
+cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
+                      typeNEO = embeddings$NEO$type, 
+                      typePID = rep(embeddings$PID$type, each = nrow(embeddings$NEO)),
+                      itemNEO = embeddings$NEO$itemID, 
+                      itemPID = rep(embeddings$PID$itemID, each = nrow(embeddings$NEO)))
+# typos in the dataset
+cordata[cordata$typePID == "eccentrictiy", "typePID"] <- "eccentricity" 
+cordata[cordata$typePID == "intimicy avoidance", "typePID"] <- "intimacy avoidance"
 cordata$traitPID <- traits[cordata$typePID]
 
-# create a group ordering for PID facets that respsects traits
+# create a group ordering for PID facets that respects traits
 library(forcats)
 traits <- as.integer(as.factor(cordata$traitPID))
 traits <- traits * -20 + as.integer(as.factor(cordata$typePID))
 cordata$typePID <- fct_reorder(cordata$typePID, traits)
 
 rm(cormx)
+
+# utility function for base plot
+baseplot <- function(plotdata, neoscale) {
+  p <- ggplot(plotdata, aes(cosdist, corrs)) + 
+    geom_point(aes(color = typePID), alpha=0.5, shape=16, size=2.4) + 
+    scale_colour_viridis_d(name = "PID facet", end = 1, option = "H", direction = -1) +
+    labs(title = neoscale) +
+    xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+  p
+}
+
+# utility function to add line to plot
+addneoline <- function(p, plotdata, neoscale) {
+  ldata <- layer_data(p)
+  traitcolours <- data.frame(colour = ldata$colour, 
+                             red = col2rgb(ldata$colour)[1,],
+                             green = col2rgb(ldata$colour)[2,],
+                             blue = col2rgb(ldata$colour)[3,],
+                             group = ldata$group, 
+                             traitPID = plotdata$traitPID) |>
+              group_by(traitPID) |> 
+              summarise(red = mean(red), green = mean(green), blue = mean(blue))
+    color <- rgb(traitcolours |> filter(traitPID == neoscale) |> select(red, green, blue),
+               maxColorValue = 255, alpha = 0.3*255)
+    p <- p + geom_smooth(data = filter(plotdata, traitPID == neoscale), 
+                  method = "lm", se = FALSE, color = color)
+  p
+}
+
 
 ```
 
@@ -47,7 +73,8 @@ ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
   aes(y = corr, x = typeNEO, fill = traitPID, group = traitPID)) + 
   geom_col(position = "dodge", alpha = 0.8, color = "darkgrey") +
-  scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
+  #scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
+  scale_fill_viridis_d(option = "H") +
   labs(fill = "PID trait") + 
   xlab("NEO scale") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
@@ -96,18 +123,19 @@ In the following plots, we display the correlation of pairs of individual items 
 library(ggplot2)
 ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "lm", se = F, alpha = 0.5) + 
-  geom_point(shape=21) +
-  scale_color_viridis_d() + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
+ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
               se = F) + 
-  geom_point(shape=21) +
-  scale_color_viridis_d() + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
+neocolours <- unique(layer_data()$colour)
+ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -122,15 +150,14 @@ To obtain insight on the items driving these associations, we turn to examining 
 ### Neuroticism
 
 ```{r neuroticism, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Neuroticism"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.43 | corrs > 0.5), 
-            aes(label = typePID), alpha = 0.3) +
-  labs(title = "Neuroticism") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("neuroticism_openAI_large.pdf", width = 150, height = 95, units = "mm")
+plotdata <- filter(cordata, typeNEO == "Neuroticism")
+p <- baseplot(plotdata, "Neuroticism")
+p <- addneoline(p, plotdata, "NegativeAffect")
+p <- addneoline(p, plotdata, "Antagonism")
+p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5), 
+            aes(label = typePID), alpha = 0.4) 
+
+ggsave("neuroticism_openAI_large.pdf",  width = 150, height = 110, units = "mm")
 
 ```
 
@@ -139,15 +166,8 @@ The items that drove the association between neuroticism and PID scores were pri
 We now identify the items that make up this and other pairs with large associations.
 
 ```{r neuroticism_items, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Neuroticism"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.43 | corrs > 0.5), 
-            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
-  labs(title = "Neuroticism") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-
+p + geom_text(data = filter(plotdata,  cosdist < 0.43 | corrs > 0.55), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) 
 ```
 
 NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item is PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"). In the plot, one can see that other emotional lability items intermixed with anhedonia items to give moderate associations with neuroticism.
@@ -159,32 +179,23 @@ There were also item pairs that the language model considered similar, but gave 
 Extraversion appears to be characterized by the selective negative association of some items with anhedonia, anxiety, and withdrawal. We see the lower part of the plot, containing negative associations, being occupied by these items. 
 
 ```{r extraversion, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Extraversion"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
-                          (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
-            aes(label = typePID), alpha = 0.3) +
-  labs(title = "Extraversion") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("extraversion_openAI_large.pdf", width = 150, height = 95, units = "mm")
+plotdata <- filter(cordata, typeNEO == "Extraversion")
+p <- baseplot(plotdata, "Extraversion")
+p <- addneoline(p, plotdata, "Detachment")
+p <- addneoline(p, plotdata, "Disinhibition")
+p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.4) 
+
+ggsave("extraversion_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
 However, the language model also detected a few semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
 
 ```{r extraversion_items, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Extraversion"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Extraversion", 
+p + geom_text(data = filter(plotdata, 
                           (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
-            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
-  labs(title = "Extraversion") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3)
 ```
 
 A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
@@ -194,15 +205,14 @@ A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum La
 For conscientiousness, we can show that with lower semantic distance the associations diverge into two groups.
 
 ```{r conscientiousness, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
-            aes(label = typePID), alpha = 0.3) +
-  labs(title = "Conscientiousness") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 95, units = "mm")
+plotdata <- filter(cordata, typeNEO == "Conscientiousness")
+p <- baseplot(plotdata, "Conscientiousness")
+p <- addneoline(p, plotdata, "Anancasticity")
+p <- addneoline(p, plotdata, "Disinhibition")
+p + geom_text(data = filter(plotdata, cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.4) 
+
+ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
@@ -211,33 +221,61 @@ The items whose PID semantics drove a positive association with NEO conscientiou
 We now identify the items in the scale that are responsible for the negative association:
 
 ```{r conscientiousness_items, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
-            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
-  labs(title = "Conscientiousness") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+p + geom_text(data = filter(plotdata, cosdist < 0.45), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3)
+```
+
+NEO item 60 is "I strive for excellence in everything I do" (Bei allem, was ich tue, strebe ich nach Perfektion"). This ends up correlated with responses on PID 06 "I keep approaching things the same way, even when it isn’t working" ("Auch wenn es andere zum Wahnsinn treibt, bestehe ich darauf, alles perfekt zu machen") and PID 18, "I get stuck on one way of doing things, even when it’s clear it won’t work" ("Ich versuche Dinge weiter zu perfektionieren, auch wenn ich sie wahrscheinlich schon so gut wie möglich hinbekommen habe"). The differences in meaning between the German and English version are enough to produce different results in the semantic analysis: here, the notion of perfectionism drives a semantic association that is absent in the original English language (see Ontology.ipynb).
+
+One aspect of conscientiouness is the relative low correlations of participant responses with the anancasticity PID trait, even if the model cosidered the items fairly semantically related. Examining this trait specifically, we find
+
+```{r, message = FALSE}
+plotdata <- filter(cordata, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+p <- baseplot(plotdata, "Conscientiousness")
+p <- addneoline(p, plotdata, "Anancasticity")
+p + geom_text(data = filter(plotdata, cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.4) + 
+  scale_color_viridis_d(name = "PID facet", end = 0.9) +
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+
+ggsave("conscientiousness_detail_openAI_large.pdf", width = 150, height = 60, units = "mm")
 
 ```
 
-NEO item 60 is "I strive for excellence in everything I do" (Bei allem, was ich tue, strebe ich nach Perfektion"). This ends up correlated with responses on "I keep approaching things the same way, even when it isn’t working" ("Auch wenn es andere zum Wahnsinn treibt, bestehe ich darauf, alles perfekt zu machen") and "I get stuck on one way of doing things, even when it’s clear it won’t work" ("Ich versuche Dinge weiter zu perfektionieren, auch wenn ich sie wahrscheinlich schon so gut wie möglich hinbekommen habe"). The differences in meaning between the German and English version are enough to produce different results in the semantic analysis: here, the notion of perfectionism drives a semantic association that is absent in the original English language (see Ontology.ipynb).
+The reason for this result is that only two items correlated strongly with perfectionism and rigidity, while the rest has only moderate correlations in the responses.
+
+To see if this pattern is replicable with another model, we visualized the same result with gecko, the second-best performer in the models we tested.
+
+```{r, message = FALSE}
+geckoemb <- loadEmbeddings("embeddings_gecko_de.csv")
+cordataGecko <- cordata
+cordataGecko$cosdist <- as.vector(geckoemb$cdist)
+plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+p <- baseplot(plotdata, "Conscientiousness")
+p <- addneoline(p, plotdata, "Anancasticity")
+p + geom_text(data = filter(plotdata, corrs > 0.4), 
+            aes(label = typePID), alpha = 0.4) + 
+  scale_color_viridis_d(name = "PID facet", end = 0.9) +
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+
+ggsave("conscientiousness_detail_gecko.pdf", width = 150, height = 60, units = "mm")
+
+```
+
 
 ### Agreeableness
 
 Agreableness, in contrast, presents a weak and less specific negative association with the PID traits, with some stronger associations with manipulativeness and deceitfulness.
 
 ```{r agreeableness, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Agreeableness"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Agreeableness", cosdist < 0.5, corrs < -0.2), 
-            aes(label = typePID), alpha = 0.3) +
-  labs(title = "Agreeableness") +  
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("agreeableness_openAI_large.pdf", width = 150, height = 95, units = "mm")
+plotdata <- filter(cordata, typeNEO == "Agreeableness")
+p <- baseplot(plotdata, "Agreeableness")
+p <- addneoline(p, plotdata, "Antagonism")
+p <- addneoline(p, plotdata, "Psychoticism")
+p + geom_text(data = filter(plotdata, cosdist < 0.5, corrs < -0.2), 
+            aes(label = typePID), alpha = 0.4) 
+
+ggsave("agreeableness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
@@ -246,29 +284,22 @@ ggplot(filter(cordata, typeNEO == "Agreeableness"),
 Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
 
 ```{r openness, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Openness"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
-            aes(label = typePID), alpha = 0.3) +
-  labs(title = "Openness") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("openness_openAI_large.pdf", width = 150, height = 95, units = "mm")
+plotdata <- filter(cordata, typeNEO == "Openness")
+p <- baseplot(plotdata, "Openness")
+p <- addneoline(p, plotdata, "Detachment")
+p <- addneoline(p, plotdata, "NegativeAffect")
+p + geom_text(data = filter(plotdata, corrs < -0.2), 
+            aes(label = typePID), alpha = 0.4) 
+
+ggsave("openness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
 We can identify the NEO items that are responsible for these associations:
 
 ```{r openness_items, message = FALSE}
-ggplot(filter(cordata, typeNEO == "Openness"), 
-       aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
-  geom_smooth(color = "grey", method = "lm", se = F) + 
-  geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
-            aes(label = paste(itemNEO, itemPID, sep = ":")), alpha = 0.3) +
-  labs(title = "Openness") +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+p + geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
+            aes(label = paste(itemNEO, itemPID, sep = ":")), alpha = 0.3)
 
 ```
 

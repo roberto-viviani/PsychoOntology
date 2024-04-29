@@ -1,5 +1,6 @@
 # define matlab's pdist2
 library(Rcpp)
+library(dplyr)
 
 # Euclidean distance
 cppFunction('NumericMatrix crossdist(NumericMatrix m1, NumericMatrix m2) {
@@ -97,6 +98,20 @@ embmx <- function(frm) {
   for (count in 1 : nrow(frm)) 
     mx[count,] <- decode(frm[count, "embedding"])
   mx
+}
+
+# provide cosine distance matrix from language model
+loadEmbeddings <- function(embeddings_file) {
+  embeddings <- read.csv(embeddings_file)
+  
+  NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+  PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+  NEOmx <- embmx(NEO)
+  PIDmx <- embmx(PID)
+  rm(embeddings)
+  
+  cdist <- crcosdist(NEOmx, PIDmx)
+  retval <- list(cdist = cdist, NEO = NEO, PID = PID)
 }
 
 # mapping from PID facets to traits
