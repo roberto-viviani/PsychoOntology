@@ -29,6 +29,13 @@ cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(cdist),
                       typeNEO = NEO$type, typePID = rep(PID$type, each = nrow(NEO)),
                       itemNEO = NEO$itemID, itemPID = rep(PID$itemID, each = nrow(NEO)))
 cordata$traitPID <- traits[cordata$typePID]
+
+# create a group ordering for PID facets that respsects traits
+library(forcats)
+traits <- as.integer(as.factor(cordata$traitPID))
+traits <- traits * -20 + as.integer(as.factor(cordata$typePID))
+cordata$typePID <- fct_reorder(cordata$typePID, traits)
+
 rm(cormx)
 
 ```
@@ -39,7 +46,7 @@ The question that naturally arises is the extent to which semantic similarity ex
 ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
   aes(y = corr, x = typeNEO, fill = traitPID, group = traitPID)) + 
-  geom_col(position = "dodge", alpha = 0.8, color = "white") +
+  geom_col(position = "dodge", alpha = 0.8, color = "darkgrey") +
   scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
   labs(fill = "PID trait") + 
   xlab("NEO scale") + ylab("avg correlation") + theme_grey() + 
@@ -50,6 +57,7 @@ ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
   aes(y = corr, x = traitPID, fill = typeNEO)) + 
   geom_col(position = "dodge", alpha = 0.8, color = "white") +
+  scale_fill_viridis_d() + 
   labs(fill = "NEO scale") + 
   xlab("PID trait") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
@@ -67,7 +75,7 @@ ggplot(
   geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
   geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
     alpha = 0.2, color = "darkgrey") + 
-  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 50) + 
+  scale_color_viridis_d() + 
   labs(color = "NEO scale", shape = "PID trait") + 
   xlab("semantic distance") + ylab("avg correlation") + theme_classic()
 #ggsave("subscales_openAI_large.pdf", width = 150, height = 95, units = "mm")
@@ -89,7 +97,7 @@ library(ggplot2)
 ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "lm", se = F, alpha = 0.5) + 
   geom_point(shape=21) +
-  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 65) + 
+  scale_color_viridis_d() + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 #ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
@@ -97,8 +105,7 @@ ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +
   geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
               se = F) + 
   geom_point(shape=21) +
-  scale_color_discrete_qualitative(palette = "Pastel 1", c1 = 100, l1 = 65) + 
-  #scale_color_brewer(type = "qual", palette = 6, direction = -1) +
+  scale_color_viridis_d() + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 #ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
@@ -117,12 +124,13 @@ To obtain insight on the items driving these associations, we turn to examining 
 ```{r neuroticism, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Neuroticism"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.43 | corrs > 0.5), 
             aes(label = typePID), alpha = 0.3) +
   labs(title = "Neuroticism") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("neuroticism_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -133,7 +141,7 @@ We now identify the items that make up this and other pairs with large associati
 ```{r neuroticism_items, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Neuroticism"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Neuroticism", cosdist < 0.43 | corrs > 0.5), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
@@ -153,13 +161,14 @@ Extraversion appears to be characterized by the selective negative association o
 ```{r extraversion, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Extraversion"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Extraversion", 
                           (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
             aes(label = typePID), alpha = 0.3) +
   labs(title = "Extraversion") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("extraversion_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -168,7 +177,7 @@ However, the language model also detected a few semantic affinities between PID 
 ```{r extraversion_items, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Extraversion"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Extraversion", 
                           (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
@@ -187,12 +196,13 @@ For conscientiousness, we can show that with lower semantic distance the associa
 ```{r conscientiousness, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
             aes(label = typePID), alpha = 0.3) +
   labs(title = "Conscientiousness") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -203,7 +213,7 @@ We now identify the items in the scale that are responsible for the negative ass
 ```{r conscientiousness_items, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Conscientiousness"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(aes(group = corrs > 0), color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Conscientiousness", cosdist < 0.45), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3) +
@@ -221,12 +231,13 @@ Agreableness, in contrast, presents a weak and less specific negative associatio
 ```{r agreeableness, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Agreeableness"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Agreeableness", cosdist < 0.5, corrs < -0.2), 
             aes(label = typePID), alpha = 0.3) +
   labs(title = "Agreeableness") +  
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("agreeableness_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -237,12 +248,13 @@ Finally, we show what appears to be a genuine association between low openness a
 ```{r openness, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Openness"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
             aes(label = typePID), alpha = 0.3) +
   labs(title = "Openness") +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+#ggsave("openness_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -251,7 +263,7 @@ We can identify the NEO items that are responsible for these associations:
 ```{r openness_items, message = FALSE}
 ggplot(filter(cordata, typeNEO == "Openness"), 
        aes(cosdist, corrs)) + 
-  geom_point(aes(fill = typePID, color = typePID), alpha = 0.5, shape=21) + 
+  geom_point(aes(fill = typePID, color = typePID), alpha=0.5, shape=21, size=2.4) + 
   geom_smooth(color = "grey", method = "lm", se = F) + 
   geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
             aes(label = paste(itemNEO, itemPID, sep = ":")), alpha = 0.3) +
