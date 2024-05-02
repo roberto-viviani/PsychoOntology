@@ -29,19 +29,22 @@ getcordata <- function(cdist) {
 
 # plot function
 plotfunc <- function(data) {
-  ggplot(
-    data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  p <- ggplot(
+    data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), 
+                                                     dist = mean(cosdist)),
     aes(y = abs(corr), x = dist)) + 
     geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
     geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
       alpha = 0.2, color = "darkgrey") + 
+    scale_color_viridis_d() + 
     labs(color = "NEO scale", shape = "PID trait") + 
     xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+  p
 }
 
-# model and inference
+# model and inference. Cosine distance multiplied by 10 to have coefs for 0.1 cosine
 testfunc <- function(data) {
-  summary(glm(abs(corr) ~ dist, 
+  summary(glm(abs(corr) ~ I(dist * 10), 
     data = data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),             family = quasibinomial))
 }
 
@@ -56,8 +59,14 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_openAI_small.pdf", width = 150, height = 95, units = "mm")
 testfunc(cordata)
+#save one plot with scales (only this one)
+#ggsave("subscales_legends.pdf", width = 150, height = 95, units = "mm")
+
+#save without scales
+#ggsave("subscales_openAI_small.pdf", 
+#        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
@@ -70,7 +79,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_gecko.pdf", width = 150, height = 95, units = "mm")
+ggsave("subscales_gecko.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -84,7 +95,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_mistral.pdf", width = 150, height = 95, units = "mm")
+ggsave("subscales_mistral.pdf",         
+       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -98,7 +111,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_roberta_small.pdf", width = 150, height = 95, units = "mm")
+ggsave("subscales_roberta_small.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -129,7 +144,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_univSentEnc.pdf", width = 150, height = 95, units = "mm")
+ggsave("subscales_univSentEnc.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
