@@ -176,13 +176,56 @@ NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
 
-distmx_pooled <- (distmx_openAI + distmx_gecko + distmx_roberta) / 3
+embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_USE <- crcosdist(embmx(NEO), embmx(PID))
+
+distmx_pooled <- (distmx_openAI + distmx_gecko + distmx_roberta + distmx_USE) / 4
 
 cordata_pooled <- getcordata(distmx_pooled)
 plotfunc(cordata_pooled)
 testfunc(cordata_pooled)
 rm(list = c("embeddings", "NEO", "PID", "distmx_openAI", "distmx_gecko", 
-     "distmx_roberta", "distmx_pooled", "cordata_pooled"))
+     "distmx_roberta", "dismx_USE", "distmx_pooled", "cordata_pooled"))
 ```
 
-This reveals that the average model performs between the best and the worst model. There appears no advantage in pooling the infromation acrss models; the best model is better than other combinations.
+This reveals that the average model performs just better than the best model. However, the advantage accruing from pooling the models is small.
+
+We add Mistral to the pool, to verify robustness to model selection.
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- read.csv("embeddings_openAI_large_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_openAI <- crcosdist(embmx(NEO), embmx(PID))
+
+embeddings <- read.csv("embeddings_gecko_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_gecko <- crcosdist(embmx(NEO), embmx(PID))
+
+embeddings <- read.csv("embeddings_roberta_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
+
+embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_USE <- crcosdist(embmx(NEO), embmx(PID))
+
+embeddings <- read.csv("embeddings_mistral_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_mistral <- crcosdist(embmx(NEO), embmx(PID))
+
+distmx_pooled <- (distmx_openAI + distmx_gecko + distmx_roberta + 
+                    distmx_USE + distmx_mistral) / 4
+
+cordata_pooled <- getcordata(distmx_pooled)
+plotfunc(cordata_pooled)
+testfunc(cordata_pooled)
+rm(list = c("embeddings", "NEO", "PID", "distmx_openAI", "distmx_gecko", 
+     "distmx_roberta", "dismx_USE", "distmx_mistral", "distmx_pooled", "cordata_pooled"))
+```
