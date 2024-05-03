@@ -72,12 +72,13 @@ The question that naturally arises is the extent to which semantic similarity ex
 ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
   aes(y = corr, x = typeNEO, fill = traitPID, group = traitPID)) + 
-  geom_col(position = "dodge", alpha = 0.8, color = "darkgrey") +
+  geom_col(position = "dodge", alpha = 0.8) +
   #scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
   scale_fill_viridis_d(option = "H") +
   labs(fill = "PID trait") + 
   xlab("NEO scale") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+#decomment ggsave lines to save pdf's
 #ggsave("NEOxPID.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(
@@ -126,7 +127,7 @@ ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +
   geom_point(shape=21, alpha = 0.5) +
   scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
+#ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
@@ -135,7 +136,7 @@ ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +
   scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 neocolours <- unique(layer_data()$colour)
-ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
+#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -157,7 +158,7 @@ p <- addneoline(p, plotdata, "Antagonism")
 p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("neuroticism_openAI_large.pdf",  width = 150, height = 110, units = "mm")
+#ggsave("neuroticism_openAI_large.pdf",  width = 150, height = 110, units = "mm")
 
 ```
 
@@ -186,7 +187,7 @@ p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("extraversion_openAI_large.pdf", width = 150, height = 110, units = "mm")
+#ggsave("extraversion_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
@@ -212,7 +213,7 @@ p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+#ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
@@ -229,7 +230,7 @@ NEO item 60 is "I strive for excellence in everything I do" (Bei allem, was ich 
 
 One aspect of conscientiouness is the relative low correlations of participant responses with the anancasticity PID trait, even if the model cosidered the items fairly semantically related. Examining this trait specifically, we find
 
-```{r, message = FALSE}
+```{r consc_detail_openAI, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
 p <- baseplot(plotdata, "Conscientiousness")
 p <- addneoline(p, plotdata, "Anancasticity")
@@ -238,7 +239,7 @@ p + geom_text(data = filter(plotdata, cosdist < 0.45),
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
 
-ggsave("conscientiousness_detail_openAI_large.pdf", width = 150, height = 60, units = "mm")
+#ggsave("conscientiousness_detail_openAI_large.pdf", width = 150, height = 60, units = "mm")
 
 ```
 
@@ -246,7 +247,7 @@ The reason for this result is that only two items correlated strongly with perfe
 
 To see if this pattern is replicable with another model, we visualized the same result with gecko, the second-best performer in the models we tested.
 
-```{r, message = FALSE}
+```{r consc_detail_gecko, message = FALSE}
 geckoemb <- loadEmbeddings("embeddings_gecko_de.csv")
 cordataGecko <- cordata
 cordataGecko$cosdist <- as.vector(geckoemb$cdist)
@@ -257,11 +258,44 @@ p + geom_text(data = filter(plotdata, corrs > 0.4),
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+rm(geckoemb)
 
-ggsave("conscientiousness_detail_gecko.pdf", width = 150, height = 60, units = "mm")
+#ggsave("conscientiousness_detail_gecko.pdf", width = 150, height = 60, units = "mm")
 
 ```
 
+Another relevant issue here is that the English model diverges. This divergence is similar in the openAI and gecko models.
+
+
+```{r consc_detail_gecko, message = FALSE}
+openAIemb <- loadEmbeddings("embeddings_OpenAI_large_en.csv")
+cordataAIen <- cordata
+cordataAIen$cosdist <- as.vector(openAIemb$cdist)
+plotdata <- filter(cordataAIen, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+p <- baseplot(plotdata, "Conscientiousness")
+p <- addneoline(p, plotdata, "Anancasticity")
+p + geom_text(data = filter(plotdata, cosdist < 0.45 | corrs > 0.4), 
+            aes(label = typePID), alpha = 0.4) + 
+  scale_color_viridis_d(name = "PID facet", end = 0.9) +
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+rm("cordataAIen", "openAIemb")
+#ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 150, height = 60, units = "mm")
+
+geckoemb <- loadEmbeddings("embeddings_gecko_en.csv")
+cordataGecko <- cordata
+cordataGecko$cosdist <- as.vector(geckoemb$cdist)
+plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+p <- baseplot(plotdata, "Conscientiousness")
+p <- addneoline(p, plotdata, "Anancasticity")
+p + geom_text(data = filter(plotdata, cosdist < 0.2 | corrs > 0.4), 
+            aes(label = typePID), alpha = 0.4) + 
+  scale_color_viridis_d(name = "PID facet", end = 0.9) +
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+rm(geckemb)
+
+#ggsave("conscientiousness_detail_gecko_en.pdf", width = 150, height = 60, units = "mm")
+
+```
 
 ### Agreeableness
 
@@ -275,7 +309,7 @@ p <- addneoline(p, plotdata, "Psychoticism")
 p + geom_text(data = filter(plotdata, cosdist < 0.5, corrs < -0.2), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("agreeableness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+#ggsave("agreeableness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
@@ -291,7 +325,7 @@ p <- addneoline(p, plotdata, "NegativeAffect")
 p + geom_text(data = filter(plotdata, corrs < -0.2), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("openness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+#ggsave("openness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
