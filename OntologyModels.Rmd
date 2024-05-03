@@ -267,7 +267,7 @@ rm(geckoemb)
 Another relevant issue here is that the English model diverges. This divergence is similar in the openAI and gecko models.
 
 
-```{r consc_detail_gecko, message = FALSE}
+```{r consc_detail_gecko_en, message = FALSE}
 openAIemb <- loadEmbeddings("embeddings_OpenAI_large_en.csv")
 cordataAIen <- cordata
 cordataAIen$cosdist <- as.vector(openAIemb$cdist)
