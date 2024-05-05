@@ -36,12 +36,22 @@ cordata$typePID <- fct_reorder(cordata$typePID, traits)
 rm(cormx)
 
 # utility function for base plot
-baseplot <- function(plotdata, neoscale) {
-  p <- ggplot(plotdata, aes(cosdist, corrs)) + 
-    geom_point(aes(color = typePID), alpha=0.5, shape=16, size=2.4) + 
-    scale_colour_viridis_d(name = "PID facet", end = 1, option = "H", direction = -1) +
-    labs(title = neoscale) +
-    xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+baseplot <- function(plotdata, facetflag = FALSE) {
+  p <- ggplot(plotdata, aes(cosdist, corrs))
+  if (facetflag) {
+    p <- p + geom_point(aes(color = typePID), alpha=0.5, shape=16, size=2.4) +
+            scale_colour_viridis_d(name = "PID facet", option = "H", direction = -1)
+  }
+  else {
+    p <- p +  geom_point(aes(color = traitPID), alpha=0.5, shape=16, size=2.4) +
+            scale_colour_viridis_d(name = "PID trait", option = "H", direction = -1,
+                            labels = c("Anancasticity", "Antagonism", "Detachment",
+                                    "Disinhibition", "Negative affect",
+                                    "Psychoticism"))
+  }
+  p <- p + labs(title = NULL) +
+        xlab('semantic distance (cosine)') + ylab('responses correlation') + 
+        theme_classic() + theme(legend.position = "left")
   p
 }
 
@@ -56,13 +66,48 @@ addneoline <- function(p, plotdata, neoscale) {
                              traitPID = plotdata$traitPID) |>
               group_by(traitPID) |> 
               summarise(red = mean(red), green = mean(green), blue = mean(blue))
-    color <- rgb(traitcolours |> filter(traitPID == neoscale) |> select(red, green, blue),
-               maxColorValue = 255, alpha = 0.3*255)
+    color <- rgb(traitcolours |> filter(traitPID == neoscale) |> 
+                   select(red, green, blue),
+               maxColorValue = 255, alpha = 0.7*255)
     p <- p + geom_smooth(data = filter(plotdata, traitPID == neoscale), 
                   method = "lm", se = FALSE, color = color)
   p
 }
 
+# utility to do a bar plot of correlations
+barplf <- function(corrs, ptitle) {
+  p <- ggplot(corrs, aes(x = row.names(corrs), y = r, fill = row.names(corrs))) + 
+    geom_col() + 
+    scale_fill_viridis_d(option = "H", direction = -1,
+                         labels = c("Anancasticity", "Antagonism", "Detachment",
+                                    "Disinhibition", "Negative affect",
+                                    "Psychoticism")) + 
+    labs(title = ptitle, fill = "PID trait") + 
+    ylab("correlation responses") + xlab(NULL) +
+    theme_classic() + 
+    theme(panel.grid.major.y = element_line(), 
+          axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+          text = element_text(size = 14), aspect.ratio = 2)
+  p
+}
+
+# utility to do a boxplot of semantic distances
+bxplf <- function(plotdata) {
+  labls = c("Anancasticity", "Antagonism", "Detachment",
+            "Disinhibition", "Negative affect",
+            "Psychoticism")
+  p <- ggplot(plotdata, aes(x = traitPID, y = cosdist)) + 
+    geom_boxplot(aes(fill = traitPID), alpha = 0.6) + 
+    geom_jitter(aes(color = traitPID), alpha = 0.4, width = 0.1) + 
+    scale_fill_viridis_d(option = "H", direction = -1, labels = labls) + 
+    scale_color_viridis_d(option = "H", direction = -1, labels = labls) + 
+    ylab("semantic distance (cosine)") + xlab(NULL) +
+    theme_classic() + labs(fill = "PID trait", color = "PID trait") +
+    theme(panel.grid.major.y = element_line(), 
+            axis.text.x = element_blank(), axis.ticks.x = element_blank(),
+            text = element_text(size = 14), aspect.ratio = 2)
+  p
+}
 
 # utility to estimate pearson correlations repeatedly
 pearscorr <- function(data, yvar, xvars) {
@@ -73,8 +118,9 @@ pearscorr <- function(data, yvar, xvars) {
     stats[v,"r"] <- cs$estimate
     stats[v,"t"] <- cs$statistic
     stats[v,"p"] <- cs$p.value
-    stats[v, "pcorr"] <- ifelse(cs$p.value < 0.001 / length(xvars), "**", 
-                                ifelse(cs$p.value < 0.01 / length(xvars), "*", "-"))
+    stats[v, "pcorr"] <- ifelse(cs$p.value < 0.001 / length(xvars) / 5, "**", 
+                                ifelse(cs$p.value < 0.01 / length(xvars) / 5, 
+                                       "*", "-"))
   }
   stats
 }
@@ -170,45 +216,42 @@ To obtain insight on the items driving these associations, we turn to examining 
 We first look at the correlations between neuroticism and PID traits in the data.
 
 ```{r neuro_model, message = FALSE }
-print(pearscorr(scales, "NEOneuro", pidtraits))
+corrs <- pearscorr(scales, "NEOneuro", pidtraits)
+print(corrs)
+p <- barplf(corrs, "Neuroticism"); p
+
+#ggsave("neuroticism_openAI_large_corrs.pdf", 
+#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+#                        text = element_text(size = 14)), 
+#       width = 45, height = 60, units = "mm")
 
 ```
+
 Only antagonism is not related to neuroticism, but the major associations are with detachment, disinhibition, and negative affect.
 
 ```{r neuroticism, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Neuroticism")
-p <- baseplot(plotdata, "Neuroticism")
+p <- bxplf(plotdata); p
+#ggsave("neuroticism_openAI_large_boxes.pdf", 
+#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+#                        text = element_text(size = 14)), 
+#       width = 45, height = 60, units = "mm")
+
+p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "Disinhibition")
 p <- addneoline(p, plotdata, "Antagonism")
 p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5), 
-            aes(label = typePID), alpha = 0.4) 
+            aes(label = typePID), alpha = 0.4) + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
-ggsave("neuroticism_openAI_large.pdf",  width = 150, height = 110, units = "mm")
+#ggsave("neuroticism_openAI_large.pdf",  width = 140, height = 120, units = "mm")
 
 ```
 
 The items that drove the association between neuroticism and PID scores were primarily those of the PID facet anxiety, with some contribution from anhedonia. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants.
-
-```{r}
-
-pearscorr <- function(data, yvar, xvars) {
-  stats <- data.frame()
-  for (v in xvars) {
-    cs <- cor.test(scales[,yvar], scales[,v], 
-              method = "pearson", alternative = "two.sided")
-    stats[v,"r"] <- cs$estimate
-    stats[v,"t"] <- cs$statistic
-    stats[v,"p"] <- cs$p.value
-  }
-  stats
-}
-
-stats <- pearscorr(scales, "NEOneuro", c("PIDNegativeAffect", "PIDDetachment"))
-  
-  
-```
 
 We now identify the items that make up this and other pairs with large associations.
 
@@ -226,7 +269,14 @@ There were also item pairs that the language model considered similar, but gave 
 Extraversion was associated with the PID traits detachment (as one would expect) and negative affect.
 
 ```{r extraversion_model, message = FALSE }
-print(pearscorr(scales, "NEOextra", pidtraits))
+corrs <- pearscorr(scales, "NEOextra", pidtraits)
+print(corrs)
+p <- barplf(corrs, "Extraversion"); p
+
+ggsave("extraversion_openAI_large_corrs.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 ```
 
@@ -234,14 +284,23 @@ Extraversion appears to be characterized by the selective negative association o
 
 ```{r extraversion, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Extraversion")
-p <- baseplot(plotdata, "Extraversion")
+p <- bxplf(plotdata); p
+ggsave("extraversion_openAI_large_boxes.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
+
+p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "Disinhibition")
-p <- addneoline(p, plotdata, "Antagonism")
-p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2) | cosdist < 0.45), 
-            aes(label = typePID), alpha = 0.4) 
+p <- addneoline(p, plotdata, "NegativeAffect")
+p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2) | 
+                              cosdist < 0.45), 
+            aes(label = typePID), alpha = 0.4) + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
-ggsave("extraversion_openAI_large.pdf", width = 150, height = 110, units = "mm")
+ggsave("extraversion_openAI_large.pdf", width = 140, height = 120, units = "mm")
 
 ```
 
@@ -260,20 +319,33 @@ A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum La
 For conscientiousness, we can show that with lower semantic distance the associations diverge into two groups.
 
 ```{r conscientiousness_model, message = FALSE }
-print(pearscorr(scales, "NEOgew", pidtraits))
+corrs <- pearscorr(scales, "NEOgew", pidtraits)
+print(corrs)
+p <- barplf(corrs, "Conscientiousness"); p
+
+#ggsave("conscientiousness_openAI_large_corrs.pdf", 
+#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+#                        text = element_text(size = 14)), 
+#       width = 45, height = 60, units = "mm")
 
 ```
 
 
 ```{r conscientiousness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Conscientiousness")
-p <- baseplot(plotdata, "Conscientiousness")
+p <- bxplf(plotdata); p
+#ggsave("conscientiousness_openAI_large_boxes.pdf", 
+#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+#                        text = element_text(size = 14)), 
+#       width = 45, height = 60, units = "mm")
+
+p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anancasticity")
 p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) 
 
-#ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 110, units = "mm")
 
 ```
 
@@ -292,14 +364,14 @@ One aspect of conscientiouness is the relative low correlations of participant r
 
 ```{r consc_detail_openAI, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
-p <- baseplot(plotdata, "Conscientiousness")
+p <- baseplot(plotdata, TRUE)
 p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
 
-#ggsave("conscientiousness_detail_openAI_large.pdf", width = 150, height = 60, units = "mm")
+ggsave("conscientiousness_detail_openAI_large.pdf", width = 150, height = 60, units = "mm")
 
 ```
 
@@ -312,7 +384,7 @@ geckoemb <- loadEmbeddings("embeddings_gecko_de.csv")
 cordataGecko <- cordata
 cordataGecko$cosdist <- as.vector(geckoemb$cdist)
 plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
-p <- baseplot(plotdata, "Conscientiousness")
+p <- baseplot(plotdata, TRUE)
 p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
@@ -320,7 +392,7 @@ p + geom_text(data = filter(plotdata, corrs > 0.4),
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
 rm(geckoemb)
 
-#ggsave("conscientiousness_detail_gecko.pdf", width = 150, height = 60, units = "mm")
+ggsave("conscientiousness_detail_gecko.pdf", width = 150, height = 60, units = "mm")
 
 ```
 
@@ -332,28 +404,28 @@ openAIemb <- loadEmbeddings("embeddings_OpenAI_large_en.csv")
 cordataAIen <- cordata
 cordataAIen$cosdist <- as.vector(openAIemb$cdist)
 plotdata <- filter(cordataAIen, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
-p <- baseplot(plotdata, "Conscientiousness")
+p <- baseplot(plotdata, TRUE)
 p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, cosdist < 0.45 | corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
 rm("cordataAIen", "openAIemb")
-#ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 150, height = 60, units = "mm")
+ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 150, height = 60, units = "mm")
 
 geckoemb <- loadEmbeddings("embeddings_gecko_en.csv")
 cordataGecko <- cordata
 cordataGecko$cosdist <- as.vector(geckoemb$cdist)
 plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
-p <- baseplot(plotdata, "Conscientiousness")
+p <- baseplot(plotdata, TRUE)
 p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, cosdist < 0.2 | corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
-rm(geckemb)
+rm(geckoemb)
 
-#ggsave("conscientiousness_detail_gecko_en.pdf", width = 150, height = 60, units = "mm")
+ggsave("conscientiousness_detail_gecko_en.pdf", width = 150, height = 60, units = "mm")
 
 ```
 
@@ -362,8 +434,14 @@ rm(geckemb)
 Agreeableness has widespread negative associations with PID traits, but as expected antagonism stands out.
 
 ```{r agreeableness_model, message = FALSE }
+corrs <- pearscorr(scales, "NEOvertr", pidtraits)
+print(corrs)
+p <- barplf(corrs, "Agreeableness"); p
 
-print(pearscorr(scales, "NEOvertr", pidtraits))
+#ggsave("agreeableness_openAI_large_corrs.pdf", 
+#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+#                        text = element_text(size = 14)), 
+#       width = 45, height = 60, units = "mm")
 
 ```
 
@@ -371,7 +449,13 @@ We see that the associations with manipulativeness and deceitfulness are partly 
 
 ```{r agreeableness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Agreeableness")
-p <- baseplot(plotdata, "Agreeableness")
+p <- bxplf(plotdata); p
+#ggsave("agreeableness_openAI_large_boxes.pdf", 
+#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+#                        text = element_text(size = 14)), 
+#       width = 45, height = 60, units = "mm")
+
+p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")
 p <- addneoline(p, plotdata, "Psychoticism")
 p <- addneoline(p, plotdata, "Detachment")
@@ -387,14 +471,26 @@ ggsave("agreeableness_openAI_large.pdf", width = 150, height = 110, units = "mm"
 Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
 
 ```{r openness_model, message = FALSE }
+corrs <- pearscorr(scales, "NEOoff", pidtraits)
+print(corrs)
+p <- barplf(corrs, "Openness"); p
 
-print(pearscorr(scales, "NEOoff", pidtraits))
+ggsave("openness_openAI_large_corrs.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 ```
 
 ```{r openness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Openness")
-p <- baseplot(plotdata, "Openness")
+p <- bxplf(plotdata); p
+ggsave("openness_openAI_large_boxes.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
+
+p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Psychoticism")
