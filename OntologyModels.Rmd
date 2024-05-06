@@ -152,6 +152,7 @@ ggplot(
   labs(fill = "NEO scale") + 
   xlab("PID trait") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+#ggsave("PIDxNEO.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -345,7 +346,7 @@ p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("conscientiousness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+ggsave("conscientiousness_openAI_large.pdf", width = 140, height = 120, units = "mm")
 
 ```
 
@@ -369,9 +370,10 @@ p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") +
+  theme(legend.position = "right")
 
-ggsave("conscientiousness_detail_openAI_large.pdf", width = 150, height = 60, units = "mm")
+ggsave("conscientiousness_detail_openAI_large.pdf", width = 100, height = 60, units = "mm")
 
 ```
 
@@ -389,10 +391,11 @@ p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") +
+  theme(legend.position = "right")
 rm(geckoemb)
 
-ggsave("conscientiousness_detail_gecko.pdf", width = 150, height = 60, units = "mm")
+#ggsave("conscientiousness_detail_gecko.pdf", width = 100, height = 60, units = "mm")
 
 ```
 
@@ -409,9 +412,10 @@ p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, cosdist < 0.45 | corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") + 
+  theme(legend.position = "right")
 rm("cordataAIen", "openAIemb")
-ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 150, height = 60, units = "mm")
+ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 100, height = 60, units = "mm")
 
 geckoemb <- loadEmbeddings("embeddings_gecko_en.csv")
 cordataGecko <- cordata
@@ -422,10 +426,11 @@ p <- addneoline(p, plotdata, "Anancasticity")
 p + geom_text(data = filter(plotdata, cosdist < 0.2 | corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet")
+  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") + 
+  theme(legend.position = "right")
 rm(geckoemb)
 
-ggsave("conscientiousness_detail_gecko_en.pdf", width = 150, height = 60, units = "mm")
+#ggsave("conscientiousness_detail_gecko_en.pdf", width = 100, height = 60, units = "mm")
 
 ```
 
@@ -462,7 +467,7 @@ p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, cosdist < 0.5, corrs < -0.2), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("agreeableness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+ggsave("agreeableness_openAI_large.pdf", width = 140, height = 120, units = "mm")
 
 ```
 
@@ -497,7 +502,7 @@ p <- addneoline(p, plotdata, "Psychoticism")
 p + geom_text(data = filter(plotdata, corrs < -0.2), 
             aes(label = typePID), alpha = 0.4) 
 
-ggsave("openness_openAI_large.pdf", width = 150, height = 110, units = "mm")
+ggsave("openness_openAI_large.pdf", width = 140, height = 120, units = "mm")
 
 ```
 
