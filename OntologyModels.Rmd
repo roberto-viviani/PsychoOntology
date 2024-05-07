@@ -14,7 +14,8 @@ library(dplyr)
 source("embedding_utilities.R") 
 embeddings <- loadEmbeddings("embeddings_openAI_large_de.csv")
 
-scales <- read.csv("scales_data_extended.csv") |> tidyr::drop_na()
+#when we read the scales, we drop the extranumerary NEO items
+scales <- read.csv("scales_data_extended.csv") |> tidyr::drop_na() |> select(-NEOFFI61:-NEOFFI66)
 cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
     as.matrix(scales |> select(starts_with("PID5BF"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
@@ -152,7 +153,7 @@ ggplot(
   labs(fill = "NEO scale") + 
   xlab("PID trait") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-#ggsave("PIDxNEO.pdf", width = 150, height = 95, units = "mm")
+ggsave("PIDxNEO.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -170,7 +171,7 @@ ggplot(
   scale_color_viridis_d() + 
   labs(color = "NEO scale", shape = "PID trait") + 
   xlab("semantic distance") + ylab("avg correlation") + theme_classic()
-#ggsave("subscales_openAI_large.pdf", width = 150, height = 95, units = "mm")
+ggsave("subscales_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 summary(glm(abs(corr) ~ dist, 
             data = cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)), 
@@ -191,7 +192,7 @@ ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +
   geom_point(shape=21, alpha = 0.5) +
   scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-#ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
+ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
@@ -200,7 +201,7 @@ ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +
   scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 neocolours <- unique(layer_data()$colour)
-#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
+ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
@@ -221,10 +222,10 @@ corrs <- pearscorr(scales, "NEOneuro", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Neuroticism"); p
 
-#ggsave("neuroticism_openAI_large_corrs.pdf", 
-#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-#                        text = element_text(size = 14)), 
-#       width = 45, height = 60, units = "mm")
+ggsave("neuroticism_openAI_large_corrs.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 ```
 
@@ -233,10 +234,10 @@ Only antagonism is not related to neuroticism, but the major associations are wi
 ```{r neuroticism, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Neuroticism")
 p <- bxplf(plotdata); p
-#ggsave("neuroticism_openAI_large_boxes.pdf", 
-#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-#                        text = element_text(size = 14)), 
-#       width = 45, height = 60, units = "mm")
+ggsave("neuroticism_openAI_large_boxes.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
@@ -248,7 +249,7 @@ p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5),
   labs(text = element_text(size = 16)) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
-#ggsave("neuroticism_openAI_large.pdf",  width = 140, height = 120, units = "mm")
+ggsave("neuroticism_openAI_large.pdf",  width = 140, height = 120, units = "mm")
 
 ```
 
@@ -324,10 +325,10 @@ corrs <- pearscorr(scales, "NEOgew", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Conscientiousness"); p
 
-#ggsave("conscientiousness_openAI_large_corrs.pdf", 
-#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-#                        text = element_text(size = 14)), 
-#       width = 45, height = 60, units = "mm")
+ggsave("conscientiousness_openAI_large_corrs.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 ```
 
@@ -335,10 +336,10 @@ p <- barplf(corrs, "Conscientiousness"); p
 ```{r conscientiousness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Conscientiousness")
 p <- bxplf(plotdata); p
-#ggsave("conscientiousness_openAI_large_boxes.pdf", 
-#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-#                        text = element_text(size = 14)), 
-#       width = 45, height = 60, units = "mm")
+ggsave("conscientiousness_openAI_large_boxes.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anancasticity")
@@ -395,7 +396,7 @@ p + geom_text(data = filter(plotdata, corrs > 0.4),
   theme(legend.position = "right")
 rm(geckoemb)
 
-#ggsave("conscientiousness_detail_gecko.pdf", width = 100, height = 60, units = "mm")
+ggsave("conscientiousness_detail_gecko.pdf", width = 100, height = 60, units = "mm")
 
 ```
 
@@ -443,10 +444,10 @@ corrs <- pearscorr(scales, "NEOvertr", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Agreeableness"); p
 
-#ggsave("agreeableness_openAI_large_corrs.pdf", 
-#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-#                        text = element_text(size = 14)), 
-#       width = 45, height = 60, units = "mm")
+ggsave("agreeableness_openAI_large_corrs.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 ```
 
@@ -455,10 +456,10 @@ We see that the associations with manipulativeness and deceitfulness are partly 
 ```{r agreeableness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Agreeableness")
 p <- bxplf(plotdata); p
-#ggsave("agreeableness_openAI_large_boxes.pdf", 
-#       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-#                        text = element_text(size = 14)), 
-#       width = 45, height = 60, units = "mm")
+ggsave("agreeableness_openAI_large_boxes.pdf", 
+       plot = p + labs(title = NULL) + theme(legend.position = "null", 
+                        text = element_text(size = 14)), 
+       width = 45, height = 60, units = "mm")
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")

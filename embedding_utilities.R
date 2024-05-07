@@ -100,16 +100,17 @@ embmx <- function(frm) {
   mx
 }
 
-# provide cosine distance matrix from language model
-loadEmbeddings <- function(embeddings_file) {
+# provide cosine distance matrix from language model cleanNEO excludes NEO items over #60
+loadEmbeddings <- function(embeddings_file, cleanNEO = TRUE) {
   embeddings <- read.csv(embeddings_file)
   
   NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+  if (cleanNEO)
+    NEO <- NEO[as.integer(row.names(NEO)) < 61,]
   PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
   NEOmx <- embmx(NEO)
   PIDmx <- embmx(PID)
-  rm(embeddings)
-  
+
   cdist <- crcosdist(NEOmx, PIDmx)
   retval <- list(cdist = cdist, NEO = NEO, PID = PID)
 }

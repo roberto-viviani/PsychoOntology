@@ -15,7 +15,8 @@ library(dplyr)
 # utilities to decode embeddings
 source("embedding_utilities.R") 
 
-scales <- read.csv("scales_data.csv") |> tidyr::drop_na()
+#when we read the scales, we drop the extranumerary NEO items
+scales <- read.csv("scales_data.csv") |> tidyr::drop_na() |> select(-NEOFFI61:-NEOFFI66)
 getcordata <- function(cdist) {
   cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
       as.matrix(scales |> select(starts_with("PID5BF"))))
@@ -47,12 +48,21 @@ testfunc <- function(data) {
     data = data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),             family = quasibinomial))
 }
 
+# a utility function to load embeddings file and get rid of excess NEO items
+readembeds <- function(file.csv, cleanNEO = TRUE) {
+  embeddings <- read.csv(file.csv)
+  if (cleanNEO)
+    embeddings <- embeddings[!stringi::stri_detect_regex(embeddings$itemID, "NEOFFI6[1-6]"),]
+  embeddings
+}
+
 ```
 
 ## OpenAI, small vector embeddings
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_openAI_small_de.csv")
+embeddings <- readembeds("embeddings_openAI_small_de.csv")
+
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
@@ -63,24 +73,24 @@ testfunc(cordata)
 #ggsave("subscales_legends.pdf", width = 150, height = 95, units = "mm")
 
 #save without scales
-#ggsave("subscales_openAI_small.pdf", 
-#        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-#        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+ggsave("subscales_openAI_small.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
 ## Gecko
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_gecko_de.csv")
+embeddings <- readembeds("embeddings_gecko_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_gecko.pdf", 
-#        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-#        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+ggsave("subscales_gecko.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -88,15 +98,15 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ## Mistral
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_mistral_de.csv")
+embeddings <- readembeds("embeddings_mistral_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_mistral.pdf",         
-#       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-#       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+ggsave("subscales_mistral.pdf",         
+       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -104,15 +114,15 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ## Roberta
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_roberta_de.csv")
+embeddings <- readembeds("embeddings_roberta_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#gsave("subscales_roberta_small.pdf", 
-#        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-#        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+ggsave("subscales_roberta_small.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -122,7 +132,7 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 Like Roberta, this is a freely available model.
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_mpnetbasev2_de.csv")
+embeddings <- readembeds("embeddings_mpnetbasev2_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
@@ -137,15 +147,15 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 Universal Sentence Encoder embeddings are not based on a language model and are publicly available on the TensorFlow site.
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
+embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-#ggsave("subscales_univSentEnc.pdf", 
-#        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-#        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+ggsave("subscales_univSentEnc.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -161,22 +171,22 @@ The comparison reveals that openAI is the best model, followed by roberta and fi
 We look at whether performance can be improved by combining the information from models. We do not use mpnet because it performs poorly, but include mistral as it may provide different information.
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_openAI_large_de.csv")
+embeddings <- readembeds("embeddings_openAI_large_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_openAI <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_gecko_de.csv")
+embeddings <- readembeds("embeddings_gecko_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_gecko <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_roberta_de.csv")
+embeddings <- readembeds("embeddings_roberta_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
+embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_USE <- crcosdist(embmx(NEO), embmx(PID))
@@ -195,27 +205,27 @@ This reveals that the average model performs just better than the best model. Ho
 We add Mistral to the pool, to verify robustness to model selection.
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- read.csv("embeddings_openAI_large_de.csv")
+embeddings <- readembeds("embeddings_openAI_large_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_openAI <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_gecko_de.csv")
+embeddings <- readembeds("embeddings_gecko_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_gecko <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_roberta_de.csv")
+embeddings <- readembeds("embeddings_roberta_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_univSentEncoder_de.csv")
+embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_USE <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- read.csv("embeddings_mistral_de.csv")
+embeddings <- readembeds("embeddings_mistral_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_mistral <- crcosdist(embmx(NEO), embmx(PID))
