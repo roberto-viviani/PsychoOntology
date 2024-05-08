@@ -21,7 +21,9 @@ if 'item_de' in data.columns:
 
 # load the model
 #embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
-embed = hub.load("https://www.kaggle.com/models/google/universal-sentence-encoder/TensorFlow2/universal-sentence-encoder/2")
+#embed = hub.load("https://www.kaggle.com/models/google/universal-sentence-encoder/TensorFlow2/universal-sentence-encoder/2")
+embed = hub.load("https://kaggle.com/models/google/universal-sentence-encoder/frameworks/TensorFlow2/variations/multilingual-large/versions/2")
+#embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual/3")
 
 # get embeddings
 embeddings = embed(list(data.item)).numpy()
