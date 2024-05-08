@@ -34,22 +34,3 @@ embeddings = [text_embedder.run(item)['embedding'] for item in data.item]
 data['embedding'] = embeddings
 data.to_csv('embeddings_roberta_de.csv', index=False)
 
-# check if the 'embeddings_roberta_de.csv' file exists
-if os.path.exists('embeddings_mpnetbasev2_de.csv'):
-    # raise error if the file exists
-    raise FileExistsError('The file embeddings_mpnetbasev2_de.csv ' + 
-        'already exists. Please remove it before running this script again.')
-
-# a model recommended for its performance (https://www.sbert.net/docs/pretrained_models.html)
-text_embedder = HuggingFaceTEITextEmbedder(
-    model="sentence-transformers/all-mpnet-base-v2", 
-    token=Secret.from_token(os.environ['HF_API_KEY'])
-)
-
-embeddings = [text_embedder.run(item)['embedding'] for item in data.item]
-
-# save embeddings to the 'scales_roberta_de.csv' file
-data['embedding'] = embeddings
-data.to_csv('embeddings_mpnetbasev2_de.csv', index=False)
-
-
