@@ -177,7 +177,7 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 
 ## Universal Sentence Encoder
 
-Universal Sentence Encoder embeddings are not based on a language model and are publicly available on the TensorFlow site.
+Universal Sentence Encoder embeddings are publicly available on the TensorFlow site.
 
 ```{r, message = FALSE, warning = FALSE}
 embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
