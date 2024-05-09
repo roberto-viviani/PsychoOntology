@@ -9,6 +9,7 @@ output: word_document
 knitr::opts_chunk$set(echo = FALSE, fig.dim = c(8,5.2))
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 # utilities to decode embeddings
 source("embedding_utilities.R") 
@@ -114,20 +115,24 @@ bxplf <- function(plotdata) {
 pearscorr <- function(data, yvar, xvars) {
   stats <- data.frame()
   for (v in xvars) {
-    cs <- cor.test(scales[,yvar], scales[,v], 
-              method = "pearson", alternative = "two.sided")
+    cs <- cor.test(pull(data,yvar), pull(data,v), 
+              method = "pearson", alternative = "two.sided",
+              na.action = "na.omit")
     stats[v,"r"] <- cs$estimate
     stats[v,"t"] <- cs$statistic
     stats[v,"p"] <- cs$p.value
-    stats[v, "pcorr"] <- ifelse(cs$p.value < 0.001 / length(xvars) / 5, "**", 
-                                ifelse(cs$p.value < 0.01 / length(xvars) / 5, 
-                                       "*", "-"))
+    stats[v, "pcorr"] <- ifelse(cs$p.value < 0.001 / length(xvars) / 5, "***", 
+                                ifelse(cs$p.value < 0.01 / length(xvars) / 5, "**", 
+                                ifelse(cs$p.value < 0.05 / length(xvars) / 5, 
+                                       "*", "-")))
   }
   stats
 }
 
 pidtraits <- c("PIDAnancasticity", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
+traitnames <- c("Anancasticity", "Antagonism", "Detachment",
+               "Disinhibition", "NegativeAffect", "Psychoticism")
 ```
 
 The question that naturally arises is the extent to which semantic similarity explains the correlation between scales. The average correlation between NEO and PID scales, computed from the correlation of the items, is shown in the following figures.
@@ -251,6 +256,8 @@ p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5),
 
 ggsave("neuroticism_openAI_large.pdf",  width = 140, height = 120, units = "mm")
 
+pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+
 ```
 
 The items that drove the association between neuroticism and PID scores were primarily those of the PID facet anxiety, with some contribution from anhedonia. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants.
@@ -304,9 +311,13 @@ p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2) |
 
 ggsave("extraversion_openAI_large.pdf", width = 140, height = 120, units = "mm")
 
+pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+
 ```
 
 However, the language model also detected a few semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
+
+We now look at the individual item pairs.
 
 ```{r extraversion_items, message = FALSE}
 p + geom_text(data = filter(plotdata, 
@@ -345,9 +356,12 @@ p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anancasticity")
 p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
-            aes(label = typePID), alpha = 0.4) 
+            aes(label = typePID), alpha = 0.4) +
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
 ggsave("conscientiousness_openAI_large.pdf", width = 140, height = 120, units = "mm")
+
+pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 ```
 
@@ -372,6 +386,7 @@ p + geom_text(data = filter(plotdata, cosdist < 0.45),
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
   theme(legend.position = "right")
 
 ggsave("conscientiousness_detail_openAI_large.pdf", width = 100, height = 60, units = "mm")
@@ -393,10 +408,11 @@ p + geom_text(data = filter(plotdata, corrs > 0.4),
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
   theme(legend.position = "right")
 rm(geckoemb)
 
-ggsave("conscientiousness_detail_gecko.pdf", width = 100, height = 60, units = "mm")
+#ggsave("conscientiousness_detail_gecko.pdf", width = 100, height = 60, units = "mm")
 
 ```
 
@@ -414,6 +430,7 @@ p + geom_text(data = filter(plotdata, cosdist < 0.45 | corrs > 0.4),
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") + 
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
   theme(legend.position = "right")
 rm("cordataAIen", "openAIemb")
 ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 100, height = 60, units = "mm")
@@ -428,6 +445,7 @@ p + geom_text(data = filter(plotdata, cosdist < 0.2 | corrs > 0.4),
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
   labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") + 
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
   theme(legend.position = "right")
 rm(geckoemb)
 
@@ -466,9 +484,12 @@ p <- addneoline(p, plotdata, "Antagonism")
 p <- addneoline(p, plotdata, "Psychoticism")
 p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, cosdist < 0.5, corrs < -0.2), 
-            aes(label = typePID), alpha = 0.4) 
+            aes(label = typePID), alpha = 0.4) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
 ggsave("agreeableness_openAI_large.pdf", width = 140, height = 120, units = "mm")
+
+pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 ```
 
@@ -501,9 +522,12 @@ p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Psychoticism")
 p + geom_text(data = filter(plotdata, corrs < -0.2), 
-            aes(label = typePID), alpha = 0.4) 
+            aes(label = typePID), alpha = 0.4) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
 ggsave("openness_openAI_large.pdf", width = 140, height = 120, units = "mm")
+
+pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 ```
 
