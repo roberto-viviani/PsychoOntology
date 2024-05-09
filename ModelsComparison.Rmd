@@ -146,6 +146,8 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 
 ## Roberta
 
+Roberta performs well, although it is not clear if it supports the German language.
+
 ```{r, message = FALSE, warning = FALSE}
 embeddings <- readembeds("embeddings_roberta_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
@@ -192,12 +194,6 @@ ggsave("subscales_univSentEnc.pdf",
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
-
-The performance of this modest is the lowest among all considered models.
-
-### Comparison models
-
-The comparison reveals that openAI is the best model, followed by roberta and finally by mistral.
 
 ## Averaged models
 

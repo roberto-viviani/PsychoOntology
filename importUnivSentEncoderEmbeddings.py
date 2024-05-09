@@ -20,10 +20,17 @@ if 'item_de' in data.columns:
     data = data.drop(columns=['item_en'])
 
 # load the model
-#embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
+# Use this if encoding English scale items
 #embed = hub.load("https://www.kaggle.com/models/google/universal-sentence-encoder/TensorFlow2/universal-sentence-encoder/2")
-embed = hub.load("https://kaggle.com/models/google/universal-sentence-encoder/frameworks/TensorFlow2/variations/multilingual-large/versions/2")
-#embed = hub.load("https://tfhub.dev/google/universal-sentence-encoder-multilingual/3")
+
+# The multilingual version of the encoder requires this line and tensorflow-text.
+# tensor-flow text is known to work with the encoder in version 2.8.x, that is code 
+# !pip install -q -U "tensorflow-text==2.8.*" 
+# However, tensorflow-text requires a tensorflow of the same version (possibly requiring
+# re-installing), AND there is no tensorflow-text for windows. Best option to use the colab 
+# or any other cloud, do the installs, and delete the runtime.
+import tensorflow_text
+embed = hub.load("https://www.kaggle.com/models/google/universal-sentence-encoder/TensorFlow2/multilingual/2")
 
 # get embeddings
 embeddings = embed(list(data.item)).numpy()
