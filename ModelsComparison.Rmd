@@ -137,7 +137,7 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-ggsave("subscales_mistral.pdf",         
+ggsave("subscales_alephalpha.pdf",         
        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
