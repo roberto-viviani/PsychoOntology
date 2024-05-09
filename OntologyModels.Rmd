@@ -2,7 +2,9 @@
 title: "Ontology Models"
 author: "Roberto Viviani, University of Innsbruck"
 date: "2024-04-18"
-output: word_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, echo=FALSE, include=FALSE}
@@ -129,6 +131,15 @@ pearscorr <- function(data, yvar, xvars) {
   stats
 }
 
+# utility to estimate anova for distances
+library(lme4)
+anovadist <- function(plotdata) {
+  test <- anova(lmer(cosdist ~ 1 + (1 | itemNEO) + (1 | itemPID), data=plotdata),
+                lmer(cosdist ~ traitPID + (1 | itemNEO) + (1 | itemPID), data=plotdata))
+  print(paste("Chi square:", test$Chisq[2], ", df", test$Df[2], ", p =", 
+              test$`Pr(>Chisq)`[2]))
+}
+
 pidtraits <- c("PIDAnancasticity", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
 traitnames <- c("Anancasticity", "Antagonism", "Detachment",
@@ -243,6 +254,7 @@ ggsave("neuroticism_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
@@ -298,6 +310,7 @@ ggsave("extraversion_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
@@ -351,6 +364,7 @@ ggsave("conscientiousness_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anancasticity")
@@ -478,6 +492,7 @@ ggsave("agreeableness_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")
@@ -516,6 +531,7 @@ ggsave("openness_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
