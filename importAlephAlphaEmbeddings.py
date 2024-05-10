@@ -6,7 +6,7 @@ import os
 import pandas as pd
 
 # Aleph Alpha endpoints
-from aleph_alpha_client import Client, Prompt, SemanticRepresentation, SemanticEmbeddingRequest
+from aleph_alpha_client import Client, Prompt, SemanticRepresentation, SemanticEmbeddingRequest, EmbeddingRequest
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -63,3 +63,60 @@ for text in data.item.values:
 
 data['embedding'] = symmetric_embeddings
 data.to_csv('embeddings_alephalpha_base_de.csv', index=False)
+
+embeddings = []
+for text in data.item.values:
+    symmetric_params = {
+        "prompt": Prompt.from_text(text),
+        "representation": SemanticRepresentation.Symmetric,
+        "compress_to_size": None
+    }
+    request = EmbeddingRequest(prompt = Prompt.from_text(text), 
+                               layers = [-1], pooling = ["mean"])
+    response = client.embed(request=request, model="luminous-extended")
+    embeddings.append(response.embeddings)
+
+# embeddings is a list of dictionaries with the indication of the op and layer. 
+# Convert it to a list of the values of the dictionaries
+embeddings = [list(embedding.values())[0] for embedding in embeddings]
+data['embedding'] = embeddings
+
+data.to_csv('embeddings_alephalpha_extended_de.csv', index=False)
+
+embeddings = []
+for text in data.item.values:
+    symmetric_params = {
+        "prompt": Prompt.from_text(text),
+        "representation": SemanticRepresentation.Symmetric,
+        "compress_to_size": None
+    }
+    request = EmbeddingRequest(prompt = Prompt.from_text(text), 
+                               layers = [-1], pooling = ["mean"])
+    response = client.embed(request=request, model="luminous-supreme")
+    embeddings.append(response.embeddings)
+
+# embeddings is a list of dictionaries with the indication of the op and layer. 
+# Convert it to a list of the values of the dictionaries
+embeddings = [list(embedding.values())[0] for embedding in embeddings]
+data['embedding'] = embeddings
+
+data.to_csv('embeddings_alephalpha_supreme_de.csv', index=False)
+
+embeddings = []
+for text in data.item.values:
+    symmetric_params = {
+        "prompt": Prompt.from_text(text),
+        "representation": SemanticRepresentation.Symmetric,
+        "compress_to_size": None
+    }
+    request = EmbeddingRequest(prompt = Prompt.from_text(text), 
+                               layers = [-1], pooling = ["max"])
+    response = client.embed(request=request, model="luminous-extended")
+    embeddings.append(response.embeddings)
+
+# embeddings is a list of dictionaries with the indication of the op and layer. 
+# Convert it to a list of the values of the dictionaries
+embeddings = [list(embedding.values())[0] for embedding in embeddings]
+data['embedding'] = embeddings
+
+data.to_csv('embeddings_alephalpha_extended_max_de.csv', index=False)

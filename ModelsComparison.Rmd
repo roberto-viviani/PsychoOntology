@@ -159,6 +159,50 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_alephalpha_extended_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+#ggsave("subscales_alephalpha_extended.pdf",         
+#       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_alephalpha_extended_max_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+#ggsave("subscales_alephalpha_extended.pdf",         
+#       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_alephalpha_supreme_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+#ggsave("subscales_alephalpha_supreme.pdf",         
+#       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
 ## Roberta
 
 Roberta performs well, although it is not clear if it supports the German language.
@@ -225,12 +269,12 @@ NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_gecko <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
+embeddings <- readembeds("embeddings_alephalpha_extended_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-distmx_USE <- crcosdist(embmx(NEO), embmx(PID))
+distmx_aleph <- crcosdist(embmx(NEO), embmx(PID))
 
-distmx_pooled <- (distmx_openAI + distmx_gecko + distmx_USE) / 3
+distmx_pooled <- (distmx_openAI + distmx_gecko + distmx_aleph) / 3
 
 cordata_pooled <- getcordata(distmx_pooled)
 plotfunc(cordata_pooled)
@@ -269,7 +313,7 @@ NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_mistral <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- readembeds("embeddings_alephalpha_base_de.csv")
+embeddings <- readembeds("embeddings_alephalpha_extended_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_alephalpha <- crcosdist(embmx(NEO), embmx(PID))
