@@ -211,13 +211,13 @@ ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +
 ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
-  geom_smooth(aes(group = typeNEO), method = "glm", method.args = c("family"="quasibinomial"), 
-              se = F) + 
+  geom_smooth(aes(group = typeNEO), method = "glm", 
+              method.args = c("family"="quasibinomial"), se = F) + 
   geom_point(shape=21, alpha = 0.5) +
   scale_color_viridis_d(name = "NEO scale") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 neocolours <- unique(layer_data()$colour)
-ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
+#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
