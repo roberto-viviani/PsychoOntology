@@ -10,6 +10,7 @@ from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
 
 def embed_text(
     texts: List[str],
+    # change this to text-multilingual-embedding-preview-0409 for version 4
     model_name: str = "textembedding-gecko-multilingual@001",
     task: str = "SEMANTIC_SIMILARITY"
 ) -> List[List[float]]:
@@ -31,6 +32,6 @@ data.rename(columns={'item_de': 'item'}).drop(columns=['item_en']).to_csv('embed
 data['embedding'] = embed_text(data['item_en'])
 data.rename(columns={'item_en': 'item'}).drop(columns=['item_de']).to_csv('embeddings_gecko_en.csv', index=False)
 
-# retrieve embeddings from latest gecko model (this may not be available and generate an error)
+# retrieve embeddings from latest gecko model (this available only us-central1)
 data['embedding'] = embed_text(data['item_de'], 'text-multilingual-embedding-preview-0409')
 data.rename(columns={'item_de': 'item'}).drop(columns=['item_en']).to_csv('embeddings_gecko_0409_de.csv', index=False)
