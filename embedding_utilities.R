@@ -137,8 +137,8 @@ traits <- c(
   "perceptual dysregulation" = "Psychoticism",
   "perceptual dysreg" = "Psychoticism",
   "unusual beliefs" = "Psychoticism",
-  "perfectionism" = "Anancasticity",
-  "rigid perfectionism" = "Anancasticity",
-  "rigidity" = "Anancasticity",
-  "orderliness" = "Anancasticity"
+  "perfectionism" = "Anankastia",
+  "rigid perfectionism" = "Anankastia",
+  "rigidity" = "Anankastia",
+  "orderliness" = "Anankastia"
 )

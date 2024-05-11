@@ -10,12 +10,12 @@ baseplot <- function(plotdata, facetflag = FALSE) {
   else {
     p <- p +  geom_point(aes(color = traitPID), alpha=0.5, shape=16, size=2.4) +
       scale_colour_viridis_d(name = "PID trait", option = "H", direction = -1,
-                             labels = c("Anancasticity", "Antagonism", "Detachment",
+                             labels = c("Anankastia", "Antagonism", "Detachment",
                                         "Disinhibition", "Negative affect",
                                         "Psychoticism"))
   }
   p <- p + labs(title = NULL) +
-    xlab('semantic distance (cosine)') + ylab('responses correlation') + 
+    xlab('semantic distance') + ylab('responses correlation') + 
     theme_classic() + theme(legend.position = "left")
   p
 }
@@ -44,7 +44,7 @@ barplf <- function(corrs, ptitle) {
   p <- ggplot(corrs, aes(x = row.names(corrs), y = r, fill = row.names(corrs))) + 
     geom_col() + 
     scale_fill_viridis_d(option = "H", direction = -1,
-                         labels = c("Anancasticity", "Antagonism", "Detachment",
+                         labels = c("Anankastia", "Antagonism", "Detachment",
                                     "Disinhibition", "Negative affect",
                                     "Psychoticism")) + 
     labs(title = ptitle, fill = "PID trait") + 
@@ -58,7 +58,7 @@ barplf <- function(corrs, ptitle) {
 
 # utility to do a boxplot of semantic distances
 bxplf <- function(plotdata) {
-  labls = c("Anancasticity", "Antagonism", "Detachment",
+  labls = c("Anankastia", "Antagonism", "Detachment",
             "Disinhibition", "Negative affect",
             "Psychoticism")
   p <- ggplot(plotdata, aes(x = traitPID, y = cosdist)) + 
@@ -66,7 +66,7 @@ bxplf <- function(plotdata) {
     geom_jitter(aes(color = traitPID), alpha = 0.4, width = 0.1) + 
     scale_fill_viridis_d(option = "H", direction = -1, labels = labls) + 
     scale_color_viridis_d(option = "H", direction = -1, labels = labls) + 
-    ylab("semantic distance (cosine)") + xlab(NULL) +
+    ylab("semantic distance") + xlab(NULL) +
     theme_classic() + labs(fill = "PID trait", color = "PID trait") +
     theme(panel.grid.major.y = element_line(), 
           axis.text.x = element_blank(), axis.ticks.x = element_blank(),

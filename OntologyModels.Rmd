@@ -47,7 +47,7 @@ source("stats_utilities.R")
 
 pidtraits <- c("PIDAnancasticity", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
-traitnames <- c("Anancasticity", "Antagonism", "Detachment",
+traitnames <- c("Anankastia", "Antagonism", "Detachment",
                "Disinhibition", "NegativeAffect", "Psychoticism")
 ```
 
@@ -60,8 +60,8 @@ ggplot(
   geom_col(position = "dodge", alpha = 0.8) +
   #scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
   scale_fill_viridis_d(option = "H") +
-  labs(fill = "PID trait") + 
-  xlab("NEO scale") + ylab("avg correlation") + theme_grey() + 
+  labs(fill = "PID domain") + 
+  xlab("NEO trait") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 #decomment ggsave lines to save pdf's
 #ggsave("NEOxPID.pdf", width = 150, height = 95, units = "mm")
@@ -71,14 +71,14 @@ ggplot(
   aes(y = corr, x = traitPID, fill = typeNEO)) + 
   geom_col(position = "dodge", alpha = 0.8, color = "white") +
   scale_fill_viridis_d() + 
-  labs(fill = "NEO scale") + 
-  xlab("PID trait") + ylab("avg correlation") + theme_grey() + 
+  labs(fill = "NEO trait") + 
+  xlab("PID domain") + ylab("avg correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ggsave("PIDxNEO.pdf", width = 150, height = 95, units = "mm")
 
 ```
 
-We see here the pattern of a positive association between neuroticism and PID scores, and a negative association of all other NEO scales, with the exception of openness to experience that had no association, except to psychoticism. Conscientiousness is another exception to this pattern because of the diverging associations with anancasticity (positive) and disinhibition (negative).
+We see here the pattern of a positive association between neuroticism and PID scores, and a negative association of all other NEO traits, with the exception of openness to experience that had no association, except to psychoticism. Conscientiousness is another exception to this pattern because of the diverging associations with anancasticity (positive) and disinhibition (negative).
 
 To see how much these correlations are explained by semantic relatedness, we plotted their absolute value on semantic relatedness (we used the absolute value to redress the issue of the differing polarity of the NEO subscales).
 
@@ -90,7 +90,7 @@ ggplot(
   geom_smooth(method = "glm", method.args = c("family"="quasibinomial"), 
     alpha = 0.2, color = "darkgrey") + 
   scale_color_viridis_d() + 
-  labs(color = "NEO scale", shape = "PID trait") + 
+  labs(color = "NEO trait", shape = "PID domain") + 
   xlab("semantic distance") + ylab("avg correlation") + theme_classic()
 ggsave("subscales_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
@@ -111,7 +111,7 @@ library(ggplot2)
 ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "lm", se = F, alpha = 0.5) + 
   geom_point(shape=21, alpha = 0.5) +
-  scale_color_viridis_d(name = "NEO scale") + 
+  scale_color_viridis_d(name = "NEO trait") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
@@ -119,7 +119,7 @@ ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +
   geom_smooth(aes(group = typeNEO), method = "glm", 
               method.args = c("family"="quasibinomial"), se = F) + 
   geom_point(shape=21, alpha = 0.5) +
-  scale_color_viridis_d(name = "NEO scale") + 
+  scale_color_viridis_d(name = "NEO trait") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 neocolours <- unique(layer_data()$colour)
 #ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
@@ -136,7 +136,7 @@ To obtain insight on the items driving these associations, we turn to examining 
 
 ### Neuroticism
 
-We first look at the correlations between neuroticism and PID traits in the data.
+We first look at the correlations between neuroticism and PID domains in the data.
 
 ```{r neuro_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOneuro", pidtraits)
@@ -192,7 +192,7 @@ There were also item pairs that the language model considered similar, but gave 
 
 ### Extraversion
 
-Extraversion was associated with the PID traits detachment (as one would expect) and negative affect.
+Extraversion was associated with the PID domains detachment (as one would expect) and negative affect.
 
 ```{r extraversion_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOextra", pidtraits)
@@ -219,10 +219,7 @@ anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
-p <- addneoline(p, plotdata, "Disinhibition")
-p <- addneoline(p, plotdata, "NegativeAffect")
-p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2) | 
-                              cosdist < 0.45), 
+p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2)), 
             aes(label = typePID), alpha = 0.4) + 
   labs(text = element_text(size = 16)) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
@@ -272,7 +269,7 @@ ggsave("conscientiousness_openAI_large_boxes.pdf",
 anovadist(plotdata)
 
 p <- baseplot(plotdata)
-p <- addneoline(p, plotdata, "Anancasticity")
+p <- addneoline(p, plotdata, "Anankastia")
 p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) +
@@ -295,16 +292,16 @@ p + geom_text(data = filter(plotdata, cosdist < 0.45),
 
 NEO item 60 is "I strive for excellence in everything I do" (Bei allem, was ich tue, strebe ich nach Perfektion"). This ends up correlated with responses on PID 06 "I keep approaching things the same way, even when it isn’t working" ("Auch wenn es andere zum Wahnsinn treibt, bestehe ich darauf, alles perfekt zu machen") and PID 18, "I get stuck on one way of doing things, even when it’s clear it won’t work" ("Ich versuche Dinge weiter zu perfektionieren, auch wenn ich sie wahrscheinlich schon so gut wie möglich hinbekommen habe"). The differences in meaning between the German and English version are enough to produce different results in the semantic analysis: here, the notion of perfectionism drives a semantic association that is absent in the original English language (see Ontology.ipynb).
 
-One aspect of conscientiouness is the relative low correlations of participant responses with the anancasticity PID trait, even if the model cosidered the items fairly semantically related. Examining this trait specifically, we find
+One aspect of conscientiouness is the relative low correlations of participant responses with the anancasticity PID domain, even if the model cosidered the items fairly semantically related. Examining this trait specifically, we find
 
 ```{r consc_detail_openAI, message = FALSE}
-plotdata <- filter(cordata, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+plotdata <- filter(cordata, typeNEO == "Conscientiousness", traitPID == "Anankastia")
 p <- baseplot(plotdata, TRUE)
-p <- addneoline(p, plotdata, "Anancasticity")
+p <- addneoline(p, plotdata, "Anankastia")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") +
+  labs(title = "Conscientiousness in Anankastia", colour = "PID facet") +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
   theme(legend.position = "right")
 
@@ -320,13 +317,13 @@ To see if this pattern is replicable with another model, we visualized the same 
 geckoemb <- loadEmbeddings("embeddings_gecko_de.csv")
 cordataGecko <- cordata
 cordataGecko$cosdist <- as.vector(geckoemb$cdist)
-plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anankastia")
 p <- baseplot(plotdata, TRUE)
-p <- addneoline(p, plotdata, "Anancasticity")
+p <- addneoline(p, plotdata, "Anankastia")
 p + geom_text(data = filter(plotdata, corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") +
+  labs(title = "Conscientiousness in Anankastia", colour = "PID facet") +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
   theme(legend.position = "right")
 rm(geckoemb)
@@ -342,13 +339,13 @@ Another relevant issue here is that the English model diverges. This divergence 
 openAIemb <- loadEmbeddings("embeddings_OpenAI_large_en.csv")
 cordataAIen <- cordata
 cordataAIen$cosdist <- as.vector(openAIemb$cdist)
-plotdata <- filter(cordataAIen, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+plotdata <- filter(cordataAIen, typeNEO == "Conscientiousness", traitPID == "Anankastia")
 p <- baseplot(plotdata, TRUE)
-p <- addneoline(p, plotdata, "Anancasticity")
+p <- addneoline(p, plotdata, "Anankastia")
 p + geom_text(data = filter(plotdata, cosdist < 0.45 | corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") + 
+  labs(title = "Conscientiousness in Anankastia", colour = "PID facet") + 
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
   theme(legend.position = "right")
 rm("cordataAIen", "openAIemb")
@@ -357,13 +354,13 @@ ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 100, height = 60,
 geckoemb <- loadEmbeddings("embeddings_gecko_en.csv")
 cordataGecko <- cordata
 cordataGecko$cosdist <- as.vector(geckoemb$cdist)
-plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anancasticity")
+plotdata <- filter(cordataGecko, typeNEO == "Conscientiousness", traitPID == "Anankastia")
 p <- baseplot(plotdata, TRUE)
-p <- addneoline(p, plotdata, "Anancasticity")
+p <- addneoline(p, plotdata, "Anankastia")
 p + geom_text(data = filter(plotdata, cosdist < 0.2 | corrs > 0.4), 
             aes(label = typePID), alpha = 0.4) + 
   scale_color_viridis_d(name = "PID facet", end = 0.9) +
-  labs(title = "Conscientiousness vs. Anancasticity", colour = "PID facet") + 
+  labs(title = "Conscientiousness in Anankastia", colour = "PID facet") + 
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
   theme(legend.position = "right")
 rm(geckoemb)
@@ -374,7 +371,7 @@ rm(geckoemb)
 
 ### Agreeableness
 
-Agreeableness has widespread negative associations with PID traits, but as expected antagonism stands out.
+Agreeableness has widespread negative associations with PID domains, but as expected antagonism stands out.
 
 ```{r agreeableness_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOvertr", pidtraits)
@@ -440,7 +437,6 @@ anovadist(plotdata)
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
-p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Psychoticism")
 p + geom_text(data = filter(plotdata, corrs < -0.2), 
             aes(label = typePID), alpha = 0.4) +
