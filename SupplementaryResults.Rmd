@@ -69,6 +69,58 @@ traitnames <- c("Anankastia", "Antagonism", "Detachment",
 
 ```
 
+### General NEO subscale associations
+
+```{r main, message = FALSE}
+
+p1 <- ggplot(cordata_1, aes(cosdist, corrs, color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "lm", se = T, alpha = 0.1) + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO trait") + labs(title = models[1]) +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+p2 <- ggplot(cordata_2, aes(cosdist, corrs, color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "lm", se = T, alpha = 0.1) + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO trait") + labs(title = models[2]) +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+p3 <- ggplot(cordata_3, aes(cosdist, corrs, color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "lm", se = T, alpha = 0.1) + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO trait") + labs(title = models[3]) +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+
+p1 <- ggplot(cordata_1, aes(cosdist, abs(corrs), color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "glm", 
+              method.args = c("family"="quasibinomial"), se = T, alpha = 0.1) + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO trait") + labs(title = models[1]) +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+p2 <- ggplot(cordata_2, aes(cosdist, abs(corrs), color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "glm", 
+              method.args = c("family"="quasibinomial"), se = T, alpha = 0.1) + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO trait") + labs(title = models[2]) + 
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+p3 <- ggplot(cordata_3, aes(cosdist, abs(corrs), color = typeNEO)) +  
+  geom_smooth(aes(group = typeNEO), method = "glm", 
+              method.args = c("family"="quasibinomial"), se = T, alpha = 0.1) + 
+  geom_point(shape=21, alpha = 0.5) +
+  scale_color_viridis_d(name = "NEO trait") + labs(title = models[3]) +
+  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+```
+
+Note here that the universal sentence encoder puts more item pairs in the corner of the plot where semantic distance is low and correlation in about zero. In this respect, gecko appears to perform best even if the significance of the association between response correlations and semantic distances is slightly lower than open AI in the logistic binomial model. As a result, extraversion becomes negatively associated with the PIDS rather than being flat as in the open AI model. Openness to experience remains flatter.
+
 ### Neuroticism
 
 ```{r neuroticism, message = FALSE}
