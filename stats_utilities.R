@@ -44,4 +44,5 @@ anovadist <- function(plotdata) {
                 lmer(cosdist ~ traitPID + (1 | itemNEO) + (1 | itemPID), data=plotdata))
   print(paste("Chi square:", test$Chisq[2], ", df", test$Df[2], ", p =", 
               test$`Pr(>Chisq)`[2]))
+  test
 }

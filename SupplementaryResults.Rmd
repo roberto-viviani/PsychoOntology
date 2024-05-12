@@ -1,0 +1,429 @@
+---
+title: "Supplementary results"
+author: "Roberto"
+date: "2024-04-22"
+output:
+  html_document:
+    df_print: paged
+---
+
+We test the extent to which semantic similarity predicts the respondent correlation of answers across subscales using different large language models.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.dim = c(8,5.2))
+library(ggplot2)
+library(ggpubr)
+
+library(dplyr)
+library(tidyr)
+
+# utilities to decode embeddings
+source("embedding_utilities.R") 
+
+getassocmx <- function(embeddings, scales) {
+# compute data.frame with embedding distance and response correlations
+# The response correlations are given by scales, which may be loaded from
+# scales_data_extended_csv or scales_data.csv
+  
+  #when we read the scales, we drop the extranumerary NEO items
+  cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
+      as.matrix(scales |> select(starts_with("PID5BF"))))
+  cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
+                        typeNEO = embeddings$NEO$type, 
+                        typePID = rep(embeddings$PID$type, each = nrow(embeddings$NEO)),
+                        itemNEO = embeddings$NEO$itemID, 
+                        itemPID = rep(embeddings$PID$itemID, each = nrow(embeddings$NEO)))
+  # typos in the dataset
+  cordata[cordata$typePID == "eccentrictiy", "typePID"] <- "eccentricity" 
+  cordata[cordata$typePID == "intimicy avoidance", "typePID"] <- "intimacy avoidance"
+  cordata$traitPID <- traits[cordata$typePID]
+  
+  # create a group ordering for PID facets that respects traits
+  library(forcats)
+  traits <- as.integer(as.factor(cordata$traitPID))
+  traits <- traits * -20 + as.integer(as.factor(cordata$typePID))
+  cordata$typePID <- fct_reorder(cordata$typePID, traits)
+
+  cordata
+}
+
+scales <- read.csv("scales_data_extended.csv") |> tidyr::drop_na() |>
+    select(-NEOFFI61:-NEOFFI66)
+
+# load embeddings from models
+cordata_1 <- getassocmx(loadEmbeddings("embeddings_openAI_large_de.csv"), scales)
+cordata_2 <- getassocmx(loadEmbeddings("embeddings_gecko_de.csv"), scales)
+cordata_3 <- getassocmx(loadEmbeddings("embeddings_univSentEncoder_de.csv"), scales)
+models <- c("OpenAI", "gecko", "USE")
+
+# plotting utilities
+source("plot_utilities.R")
+
+# stat utilities
+source("stats_utilities.R")
+
+pidtraits <- c("PIDAnancasticity", "PIDAntagonism", "PIDDetachment",
+               "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
+traitnames <- c("Anankastia", "Antagonism", "Detachment",
+               "Disinhibition", "NegativeAffect", "Psychoticism")
+
+```
+
+### Neuroticism
+
+```{r neuroticism, message = FALSE}
+plotdata_1 <- filter(cordata_1, typeNEO == "Neuroticism")
+plotdata_2 <- filter(cordata_2, typeNEO == "Neuroticism")
+plotdata_3 <- filter(cordata_3, typeNEO == "Neuroticism")
+
+chi1 <- anovadist(plotdata_1)$Chisq[2]
+chi2 <- anovadist(plotdata_2)$Chisq[2]
+chi3 <- anovadist(plotdata_3)$Chisq[2]
+
+p1 <- bxplf(plotdata_1) + labs(title = models[1]) + 
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi1, digits = 4))))
+p2 <- bxplf(plotdata_2) + labs(title = models[2]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi2, digits = 4))))
+p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi3, digits = 4))))
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+pf <- function(plotdata) {
+  p <- baseplot(plotdata)
+  p <- addneoline(p, plotdata, "NegativeAffect")
+  p <- addneoline(p, plotdata, "Detachment")
+  p <- addneoline(p, plotdata, "Disinhibition")
+  p <- addneoline(p, plotdata, "Antagonism")
+  p <- p + labs(text = element_text(size = 16)) +
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  p  
+}
+# the correlations are the same in all plotdata variables
+crbound <- quantile(abs(plotdata_1$corrs), probs = 0.975)
+csbound <- function(plotdata) {q <- quantile(plotdata$cosdist, probs=1-0.975); q}
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1, 
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3,
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1,
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3, 
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+```
+
+### Extraversion
+
+```{r extraversion, message = FALSE}
+plotdata_1 <- filter(cordata_1, typeNEO == "Extraversion")
+plotdata_2 <- filter(cordata_2, typeNEO == "Extraversion")
+plotdata_3 <- filter(cordata_3, typeNEO == "Extraversion")
+
+chi1 <- anovadist(plotdata_1)$Chisq[2]
+chi2 <- anovadist(plotdata_2)$Chisq[2]
+chi3 <- anovadist(plotdata_3)$Chisq[2]
+
+p1 <- bxplf(plotdata_1) + labs(title = models[1]) + 
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi1, digits = 4))))
+p2 <- bxplf(plotdata_2) + labs(title = models[2]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi2, digits = 4))))
+p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi3, digits = 4))))
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+pf <- function(plotdata) {
+  p <- baseplot(plotdata)
+  p <- addneoline(p, plotdata, "NegativeAffect")
+  p <- addneoline(p, plotdata, "Detachment")
+  p <- p + labs(text = element_text(size = 16)) +
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  p  
+}
+# the correlations are the same in all plotdata variables
+crbound <- quantile(abs(plotdata_1$corrs), probs = 0.975)
+csbound <- function(plotdata) {q <- quantile(plotdata$cosdist, probs=1-0.975); q}
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1, 
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3,
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1,
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3, 
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+```
+
+### Conscientiousness
+
+```{r conscientiousness, message = FALSE}
+plotdata_1 <- filter(cordata_1, typeNEO == "Conscientiousness")
+plotdata_2 <- filter(cordata_2, typeNEO == "Conscientiousness")
+plotdata_3 <- filter(cordata_3, typeNEO == "Conscientiousness")
+
+chi1 <- anovadist(plotdata_1)$Chisq[2]
+chi2 <- anovadist(plotdata_2)$Chisq[2]
+chi3 <- anovadist(plotdata_3)$Chisq[2]
+
+p1 <- bxplf(plotdata_1) + labs(title = models[1]) + 
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi1, digits = 4))))
+p2 <- bxplf(plotdata_2) + labs(title = models[2]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi2, digits = 4))))
+p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi3, digits = 4))))
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+pf <- function(plotdata) {
+  p <- baseplot(plotdata)
+  p <- addneoline(p, plotdata, "Anankastia")
+  p <- addneoline(p, plotdata, "Disinhibition")
+  p <- p + labs(text = element_text(size = 16)) +
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  p  
+}
+# the correlations are the same in all plotdata variables
+crbound <- quantile(abs(plotdata_1$corrs), probs = 0.975)
+csbound <- function(plotdata) {q <- quantile(plotdata$cosdist, probs=1-0.975); q}
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1, 
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3,
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1,
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3, 
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+```
+
+### Agreeableness
+
+```{r agreeableness, message = FALSE}
+plotdata_1 <- filter(cordata_1, typeNEO == "Agreeableness")
+plotdata_2 <- filter(cordata_2, typeNEO == "Agreeableness")
+plotdata_3 <- filter(cordata_3, typeNEO == "Agreeableness")
+
+chi1 <- anovadist(plotdata_1)$Chisq[2]
+chi2 <- anovadist(plotdata_2)$Chisq[2]
+chi3 <- anovadist(plotdata_3)$Chisq[2]
+
+p1 <- bxplf(plotdata_1) + labs(title = models[1]) + 
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi1, digits = 4))))
+p2 <- bxplf(plotdata_2) + labs(title = models[2]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi2, digits = 4))))
+p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi3, digits = 4))))
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+pf <- function(plotdata) {
+  p <- baseplot(plotdata)
+  p <- addneoline(p, plotdata, "Psychoticism")
+  p <- addneoline(p, plotdata, "Detachment")
+  p <- addneoline(p, plotdata, "Antagonism")
+  p <- p + labs(text = element_text(size = 16)) +
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  p  
+}
+# the correlations are the same in all plotdata variables
+crbound <- quantile(abs(plotdata_1$corrs), probs = 0.975)
+csbound <- function(plotdata) {q <- quantile(plotdata$cosdist, probs=1-0.975); q}
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1, 
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3,
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1,
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3, 
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+```
+
+### Openness to experience
+
+```{r openness, message = FALSE}
+plotdata_1 <- filter(cordata_1, typeNEO == "Openness")
+plotdata_2 <- filter(cordata_2, typeNEO == "Openness")
+plotdata_3 <- filter(cordata_3, typeNEO == "Openness")
+
+chi1 <- anovadist(plotdata_1)$Chisq[2]
+chi2 <- anovadist(plotdata_2)$Chisq[2]
+chi3 <- anovadist(plotdata_3)$Chisq[2]
+
+p1 <- bxplf(plotdata_1) + labs(title = models[1]) + 
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi1, digits = 4))))
+p2 <- bxplf(plotdata_2) + labs(title = models[2]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi2, digits = 4))))
+p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
+  xlab(bquote(chi[5]^2 ~ " = " ~ .(format(chi3, digits = 4))))
+
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+pf <- function(plotdata) {
+  p <- baseplot(plotdata)
+  p <- addneoline(p, plotdata, "Psychoticism")
+  p <- addneoline(p, plotdata, "Detachment")
+  p <- p + labs(text = element_text(size = 16)) +
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  p  
+}
+# the correlations are the same in all plotdata variables
+crbound <- quantile(abs(plotdata_1$corrs), probs = 0.975)
+csbound <- function(plotdata) {q <- quantile(plotdata$cosdist, probs=1-0.975); q}
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1, 
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3,
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = typePID), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+p1 <- pf(plotdata_1) + 
+        geom_text(data = filter(plotdata_1,
+                                cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[1])
+p2 <- pf(plotdata_2) +
+        geom_text(data = filter(plotdata_2, 
+                                cosdist < csbound(plotdata_2) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[2])
+p3 <- pf(plotdata_3) +
+        geom_text(data = filter(plotdata_3, 
+                                cosdist < csbound(plotdata_3) | abs(corrs) > crbound), 
+              aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+        labs(title = models[3])
+mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+mp
+
+```
+
