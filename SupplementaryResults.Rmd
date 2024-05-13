@@ -1,5 +1,5 @@
 ---
-title: "Supplementary results"
+title: "Supplementary results B"
 author: "Roberto"
 date: "2024-04-22"
 output:
@@ -7,10 +7,12 @@ output:
     df_print: paged
 ---
 
-We test the extent to which semantic similarity predicts the respondent correlation of answers across subscales using different large language models.
+We present here the results of the OpenAI model of the main text with the other best performing model, gecko. Our intent is to verify the replicability of results. We also present the results obtained with the universal sentence encoder (USE), a model trained with a simpler architecture, to show the improvements in replicability obtained with the newer models. Details on the models and their source are in the methods section of the main text.
+
+The results are presented side-by-side to facilitate comparison. Note that semantic distance is not a quantitative measure that can be compared per se across models. The adequate terms of comparison are the test statistics showing differences in mean semantic distances or their association with participant responses.
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.dim = c(8,5.2))
+knitr::opts_chunk$set(echo = FALSE, fig.dim = c(12,5.2))
 library(ggplot2)
 library(ggpubr)
 
@@ -89,37 +91,11 @@ p3 <- ggplot(cordata_3, aes(cosdist, corrs, color = typeNEO)) +
   scale_color_viridis_d(name = "NEO trait") + labs(title = models[3]) +
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 
-mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
-mp
-
-
-p1 <- ggplot(cordata_1, aes(cosdist, abs(corrs), color = typeNEO)) +  
-  geom_smooth(aes(group = typeNEO), method = "glm", 
-              method.args = c("family"="quasibinomial"), se = T, alpha = 0.1) + 
-  geom_point(shape=21, alpha = 0.5) +
-  scale_color_viridis_d(name = "NEO trait") + labs(title = models[1]) +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-
-p2 <- ggplot(cordata_2, aes(cosdist, abs(corrs), color = typeNEO)) +  
-  geom_smooth(aes(group = typeNEO), method = "glm", 
-              method.args = c("family"="quasibinomial"), se = T, alpha = 0.1) + 
-  geom_point(shape=21, alpha = 0.5) +
-  scale_color_viridis_d(name = "NEO trait") + labs(title = models[2]) + 
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-
-p3 <- ggplot(cordata_3, aes(cosdist, abs(corrs), color = typeNEO)) +  
-  geom_smooth(aes(group = typeNEO), method = "glm", 
-              method.args = c("family"="quasibinomial"), se = T, alpha = 0.1) + 
-  geom_point(shape=21, alpha = 0.5) +
-  scale_color_viridis_d(name = "NEO trait") + labs(title = models[3]) +
-  xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-
-mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
-mp
+ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 
 ```
 
-Note here that the universal sentence encoder puts more item pairs in the corner of the plot where semantic distance is low and correlation in about zero. In this respect, gecko appears to perform best even if the significance of the association between response correlations and semantic distances is slightly lower than open AI in the logistic binomial model. As a result, extraversion becomes negatively associated with the PIDS rather than being flat as in the open AI model. Openness to experience remains flatter.
+Note here that the universal sentence encoder puts more item pairs in the middle of the plot on the left border, where semantic distance is low and correlation is about zero. This may be an index of failure in assessing the semantic distinctness of items to which participants gave responses that were not correlated. In this respect, gecko appears to perform best even if the significance of the association between response correlations and semantic distances is slightly lower than open AI in the logistic binomial model (see main text). As a result, extraversion becomes negatively associated with the PIDS rather than being flat as in the open AI model. Openness to experience remains flat.
 
 ### Neuroticism
 
@@ -194,6 +170,8 @@ mp
 
 ```
 
+We see here that the LLMs, OpenAI and gecko, provided similar results. The universal sentence encoder could not give accurate assessments of the relationship between semantic similarity and response correlations with the PID domains. One can also see that, the scale-level assessment of semantic similarity gives no significant differences, in contrast with the other two models.
+
 ### Extraversion
 
 ```{r extraversion, message = FALSE}
@@ -265,6 +243,10 @@ mp
 
 ```
 
+All three models agree on the relationship between extraversion and detachment. Note in particular that the item pairs with the lower semantic distance were the same across models.
+
+In contrast, the relationship between extraversion and negative affect was not consistent between the LLMs. Accoring to the OpenAI model, the correlations invert in sign with larger semantic distance, a symptom of a heterogeneous relationship.
+
 ### Conscientiousness
 
 ```{r conscientiousness, message = FALSE}
@@ -335,6 +317,8 @@ mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "righ
 mp
 
 ```
+
+All models gave similar results in the analysis of consciousness, but the LLMs are more similar to each other that to the universal sentence encoder. All models agree on singling out the same two item pairs as being particularly semantically close (see text for discussion).
 
 ### Agreeableness
 
@@ -408,6 +392,8 @@ mp
 
 ```
 
+The LLMs gave similar responses to the agreeableness dataset. Specifically, the steeper slope of the fits indicates a larger estimate of the relationship between semantic similarity and response correlations.
+
 ### Openness to experience
 
 ```{r openness, message = FALSE}
@@ -478,4 +464,7 @@ mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "righ
 mp
 
 ```
+
+The analysis of the openness to experience data gave fairly concordant results in the three datasets. However, OpenAI appears to have performed slightly better than gecko, as one can see from the fact that the middle of left side of the plot is emptier. gecko also estimates the semantic similarity between openness to experience and psychoticism to be lower than the other two models. Detachment may present some degree of heterogeneity in the association with openness to experience, as we see a mixture of positive and negative associations at low semantic distances. However, this may also be due to the failure of the language model to see as different items that gave very low correlations in the responses, although the two LLMs give almost identical estimates of similarity.
+
 
