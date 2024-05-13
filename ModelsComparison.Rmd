@@ -236,6 +236,21 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+## bert German (msmarco)
+
+Like Roberta, this is a freely available model.
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_bert_msmarco_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
 ## Universal Sentence Encoder
 
 Universal Sentence Encoder embeddings are publicly available on the TensorFlow site.
