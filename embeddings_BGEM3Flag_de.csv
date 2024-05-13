@@ -1,0 +1,205 @@
+itemID,scaleID,type,item,embedding
+PID5BF01,PID,emotional lability,Ich reagiere viel emotionaler als fast alle anderen Menschen.,"[ 0.01159378  0.01188478 -0.02652619 ...  0.00303809 -0.05414582
+  0.00445719]"
+PID5BF02,PID,manipulativeness,"Ich bin gut darin, Leute reinzulegen.","[-0.01796216  0.00397722 -0.06136055 ... -0.03186563 -0.02987088
+ -0.03962695]"
+PID5BF03,PID,irresponsibility,Ich gehe oft ziemlich nachlÃ¤ssig mit meinen Sachen und denen anderer um.,"[-0.031834    0.02594816 -0.03509634 ... -0.06463616 -0.03400927
+ -0.02916699]"
+PID5BF04,PID,withdrawal,Ich halte Abstand zu Menschen.,"[-0.01502808  0.0208879  -0.07353368 ...  0.00034061 -0.03515533
+ -0.01113562]"
+PID5BF05,PID,unusual beliefs,"Ich sehe zwischen den Dingen oft ungewÃ¶hnliche ZusammenhÃ¤nge, die anderen Menschen entgehen.","[-0.04038553  0.01034589 -0.06668469 ...  0.02306702 -0.0367093
+ -0.02920889]"
+PID5BF06,PID,perfectionism,"Auch wenn es andere zum Wahnsinn treibt, bestehe ich darauf, alles perfekt zu machen.","[-0.02170768  0.04077773 -0.03180719 ...  0.00113675 -0.03493619
+ -0.00632152]"
+PID5BF07,PID,anxiousness,Ich mache mir stÃ¤ndig Ã¼ber irgendetwas Sorgen.,"[-0.02047697  0.0303888  -0.06165186 ... -0.03877159  0.00928846
+ -0.00419351]"
+PID5BF08,PID,deceitfulness,"Manchmal muss man vor anderen Ã¼bertreiben, um weiterzukommen.","[-0.03510771  0.00885635 -0.02104435 ... -0.0132734  -0.00433828
+ -0.03071854]"
+PID5BF09,PID,impulsivity,"Es kommt mir vor, als wÃ¼rde ich vÃ¶llig impulsiv handeln.","[-0.02655277  0.01183708 -0.03536814 ... -0.05222576 -0.02413952
+ -0.00748422]"
+PID5BF10,PID,anhedonia,Nichts scheint mich wirklich zu interessieren.,"[-0.00719802  0.02022229 -0.03320929 ... -0.0206055  -0.0033168
+ -0.02701119]"
+PID5BF11,PID,eccentricity,"Man hat mir gesagt, dass meine Art zu denken wirklich seltsam ist.","[-0.02550039  0.00856883 -0.01223388 ... -0.05135408 -0.02260475
+ -0.0403243 ]"
+PID5BF12,PID,rigidity,"Es ist mir wichtig, dass Dinge auf eine ganz bestimmte Weise erledigt werden.","[-0.00136328  0.02205487 -0.06087177 ... -0.02072706 -0.02289551
+ -0.05474967]"
+PID5BF13,PID,separation insecurity,"Ich mache mir viele Sorgen darÃ¼ber, allein zu sein.","[-0.00450111  0.04126237 -0.07435144 ... -0.01489426 -0.02772896
+  0.00472664]"
+PID5BF14,PID,grandiosity,"Es steht mir zu, besonders behandelt zu werden.","[-0.00449595  0.02171545 -0.05855273 ... -0.00583345 -0.01604017
+ -0.02039489]"
+PID5BF15,PID,distractibility,"Ich verliere in GesprÃ¤chen den Faden, weil mich andere Dinge ablenken.","[-0.01561612  0.01517287 -0.06758671 ... -0.05057966  0.00314673
+ -0.01922825]"
+PID5BF16,PID,intimacy avoidance,Ich halte romantische GefÃ¼hle lieber aus meinem Leben heraus.,"[-0.05426803  0.0034231  -0.03313664 ... -0.00307084 -0.01871059
+ -0.00210712]"
+PID5BF17,PID,perceptual dysregulation,"Es ist komisch, aber manchmal kommt es mir vor, dass alltÃ¤gliche GegenstÃ¤nde eine andere Form haben als sonst.","[-0.02800848  0.02173966 -0.04143577 ... -0.01978033 -0.0590722
+ -0.03912524]"
+PID5BF18,PID,perfectionism,"Ich versuche Dinge weiter zu perfektionieren, auch wenn ich sie wahrscheinlich schon so gut wie mÃ¶glich hinbekommen habe.","[-0.02519538  0.04963216 -0.02702255 ... -0.05524065 -0.02682363
+ -0.02357718]"
+PID5BF19,PID,emotional lability,"Ich werde schnell emotional, oft aus geringstem Anlass.","[-0.01323755  0.03573897 -0.02865705 ... -0.01154473 -0.04863827
+ -0.05095413]"
+PID5BF20,PID,manipulativeness,"Es fÃ¤llt mir leicht, andere auszunutzen.","[-0.03596184  0.05020971 -0.06921672 ... -0.011317   -0.01851695
+ -0.03800311]"
+PID5BF21,PID,irresponsibility,"Ich vergesse oft, meine Rechnungen zu bezahlen.","[-0.03480788  0.04310742 -0.03768028 ... -0.02988671 -0.07645095
+ -0.04751018]"
+PID5BF22,PID,withdrawal,"Ich mag es nicht, Zeit mit anderen zu verbringen.","[-0.00167267  0.03005918 -0.05206513 ...  0.0071844  -0.05312925
+ -0.02090136]"
+PID5BF23,PID,unusual beliefs,"Ich hatte einige wirklich seltsame Erlebnisse, die sehr schwer zu erklÃ¤ren sind.","[-0.0001816   0.01240763 -0.04022264 ... -0.0094713  -0.02646262
+ -0.00669341]"
+PID5BF24,PID,rigidity,Ich habe fÃ¼r viele alltÃ¤gliche Verhaltensweisen strikte Regeln.,"[-0.01730236 -0.00121778 -0.06459507 ... -0.03110854 -0.01887042
+ -0.00247051]"
+PID5BF25,PID,anxiousness,Ich mache mir Ã¼ber fast alles Sorgen.,"[ 0.00395453  0.03384106 -0.05853776 ... -0.02707675 -0.00700682
+  0.00866677]"
+PID5BF26,PID,deceitfulness,"Ich biege mir die Wahrheit zurecht, wenn es zu meinem Vorteil ist.","[-0.01775013  0.02081044 -0.05227358 ... -0.04810414 -0.03260169
+ -0.06465288]"
+PID5BF27,PID,impulsivity,"Obwohl ich es eigentlich besser weiÃ, treffe ich immer wieder Ã¼berstÃ¼rzte Entscheidungen.","[-0.02720346  0.00520996 -0.04311318 ... -0.03382621  0.0087318
+ -0.0149063 ]"
+PID5BF28,PID,anhedonia,Ich bin selten von irgendetwas begeistert.,"[-0.03869662  0.02284967 -0.04199143 ... -0.02984204 -0.01685198
+ -0.01025465]"
+PID5BF29,PID,eccentricity,"Ich habe mehrere Angewohnheiten, die andere exzentrisch oder seltsam finden.","[-0.02166601 -0.00343988 -0.05020912 ... -0.02883794 -0.02967089
+ -0.00398243]"
+PID5BF30,PID,orderliness,"Mir wurde schon mal gesagt, dass ich zu viel Zeit damit verbringe, darauf zu achten, dass alles genau an seinem Platz ist.","[ 0.00826386  0.01839413 -0.06789745 ... -0.06482845 -0.01075485
+ -0.01717165]"
+PID5BF31,PID,separation insecurity,"Ich ertrage es nicht, allein gelassen zu werden â nicht mal fÃ¼r ein paar Stunden.","[ 0.02026247  0.02962865 -0.06048844 ...  0.00257184 -0.04024543
+ -0.00185785]"
+PID5BF32,PID,grandiosity,"Ich muss mich oft mit Leuten beschÃ¤ftigen, die weniger wichtig sind als ich","[-0.04279022  0.02992655 -0.03678355 ... -0.00659437  0.00535242
+ -0.05424985]"
+PID5BF33,PID,distractibility,Ich lasse mich leicht ablenken.,"[-0.03553616  0.03430479 -0.08182393 ... -0.0186183  -0.04547172
+ -0.02399628]"
+PID5BF34,PID,intimacy avoidance,"Ich beende Beziehungen, wenn sie enger werden.","[-0.01507714  0.01645239 -0.02340425 ... -0.02335292 -0.02823914
+  0.00477286]"
+PID5BF35,PID,perceptual dysregulation,"Wenn ich einen vertrauten Gegenstand anschaue, ist es manchmal so, als wÃ¼rde ich ihn zum ersten Mal sehen.","[-0.03675124  0.03168078 -0.03466819 ...  0.0014401  -0.01218724
+ -0.01105086]"
+PID5BF36,PID,orderliness,"Andere beschweren sich darÃ¼ber, dass bei mir alles genau durchgeplant sein muss.","[-0.00366902  0.02140035 -0.06507492 ... -0.02975201 -0.01801942
+ -0.0328209 ]"
+NEOFFI01,NEO,Neuroticism,Ich bin nicht leicht beunruhigt.,"[-0.0126171  -0.00363559 -0.0696277  ... -0.00905363 -0.01138986
+ -0.0228343 ]"
+NEOFFI02,NEO,Extraversion,Ich habe gerne viele Leute um mich herum.,"[-0.01515621  0.03123998 -0.06819423 ... -0.01043781 -0.03187257
+  0.01113956]"
+NEOFFI03,NEO,Openness,Ich mag meine Zeit nicht mit TagtrÃ¤umereien verschwenden.,"[-0.01532138  0.00134921 -0.08008976 ... -0.02782981 -0.04725692
+ -0.01393986]"
+NEOFFI04,NEO,Agreeableness,"Ich versuche zu jedem, dem ich begegne, freundlich zu sein.","[-0.03568195  0.00045884 -0.02526274 ... -0.02101419 -0.05652058
+  0.00432488]"
+NEOFFI05,NEO,Conscientiousness,Ich halte meine Sachen ordentlich und sauber.,"[-0.00153154  0.01542706 -0.07769268 ... -0.04275977 -0.03361459
+ -0.05990297]"
+NEOFFI06,NEO,Neuroticism,Ich fÃ¼hle mich anderen oft unterlegen.,"[-0.05443035  0.0192303  -0.05387382 ... -0.03631432 -0.01124256
+ -0.05043619]"
+NEOFFI07,NEO,Extraversion,Ich bin leicht zum Lachen zu bringen.,"[-0.03785395  0.03087923 -0.02831167 ... -0.01034886 -0.03584453
+ -0.03984384]"
+NEOFFI08,NEO,Openness,Ich finde philosophische Diskussionen langweilig.,"[-0.03952577  0.00045936 -0.03417628 ... -0.04480557 -0.01426342
+  0.02418153]"
+NEOFFI09,NEO,Agreeableness,Ich bekomme hÃ¤ufiger Streit mit meiner Familie und meinen Kollegen.,"[-0.02550256  0.02146916 -0.05443624 ... -0.01448554 -0.00975865
+  0.00021465]"
+NEOFFI10,NEO,Conscientiousness,"Ich kann mir meine Zeit recht gut einteilen, so dass ich meine Angelegenheiten rechtzeitig beende.","[ 0.01113595  0.03316743 -0.0425039  ... -0.06584811 -0.06636927
+ -0.05237983]"
+NEOFFI11,NEO,Neuroticism,"Wenn ich unter starkem Stress stehe, fÃ¼hle ich mich manchmal, als ob ich zerbrÃ¤che.","[-0.02019961  0.0199047  -0.05680871 ... -0.03267443 -0.01668924
+ -0.04209964]"
+NEOFFI12,NEO,Extraversion,Ich halte mich nicht fÃ¼r besonders frÃ¶hlich.,"[-0.04099729  0.00791727 -0.05697788 ... -0.01914204 -0.0519819
+  0.01563258]"
+NEOFFI13,NEO,Openness,"Mich begeistern die Motive, die ich in der Kunst und in der Natur finde.","[-0.03187496 -0.01248952 -0.05976864 ... -0.00873597 -0.00894785
+ -0.04169752]"
+NEOFFI14,NEO,Agreeableness,Manche Leute halten mich fÃ¼r selbstsÃ¼chtig und selbstgefÃ¤llig.,"[-0.02005395  0.0607583  -0.042992   ... -0.03115051 -0.02797886
+ -0.02128156]"
+NEOFFI15,NEO,Conscientiousness,Ich bin kein sehr systematisch vorgehender Mensch.,"[-0.03740568  0.00030701 -0.07823347 ... -0.04344665 -0.04295312
+ -0.00072813]"
+NEOFFI16,NEO,Neuroticism,Ich fÃ¼hle mich selten einsam oder traurig.,"[-0.02750738  0.00091832 -0.04109971 ...  0.0253118  -0.02471337
+ -0.04216382]"
+NEOFFI17,NEO,Extraversion,Ich unterhalte mich wirklich gerne mit anderen Menschen.,"[-0.01354991  0.00431519 -0.03964053 ...  0.00529065 -0.0367973
+ -0.00702634]"
+NEOFFI18,NEO,Openness,"Ich glaube, dass es SchÃ¼ler oft nur verwirrt und irrefÃ¼hrt, wenn man sie Rednern zuhÃ¶ren lÃ¤sst, die kontroverse Standpunkte vertreten.","[-0.03092973  0.02984242 -0.04367747 ... -0.01603143  0.0193141
+ -0.02210175]"
+NEOFFI19,NEO,Agreeableness,"Ich wÃ¼rde lieber mit anderen zusammenarbeiten, als mit ihnen zu wetteifern.","[-0.0208565   0.02309203 -0.05601508 ...  0.00250483 -0.02598982
+ -0.01744143]"
+NEOFFI20,NEO,Conscientiousness,"Ich versuche, alle mir Ã¼bertragenen Aufgaben sehr gewissenhaft zu erledigen.","[-0.02060036  0.00899807 -0.04456489 ... -0.03315211 -0.05514299
+  0.01347848]"
+NEOFFI21,NEO,Neuroticism,Ich fÃ¼hle mich oft angespannt und nervÃ¶s.,"[-0.02644235  0.0163966  -0.03864444 ... -0.03530591 -0.02088055
+ -0.0278249 ]"
+NEOFFI22,NEO,Extraversion,Ich bin gerne im Zentrum des Geschehens.,"[ 0.01475092 -0.01835079 -0.07767815 ... -0.01513808 -0.02015079
+ -0.00713646]"
+NEOFFI23,NEO,Openness,Poesie beeindruckt mich wenig oder gar nicht.,"[-0.02494971  0.05970206 -0.00834838 ... -0.00021075 -0.01451127
+ -0.02733786]"
+NEOFFI24,NEO,Agreeableness,Im Hinblick auf die Absichten anderer bin ich eher zynisch und skeptisch.,"[-0.04263085  0.03601855 -0.01076547 ... -0.04929985 -0.00212236
+ -0.0365562 ]"
+NEOFFI25,NEO,Conscientiousness,Ich habe eine Reihe von klaren Zielen und arbeite systematisch auf sie zu.,"[-0.01406545  0.0130686  -0.07070037 ... -0.01959634 -0.0052078
+ -0.01981443]"
+NEOFFI26,NEO,Neuroticism,Manchmal fÃ¼hle ich mich vÃ¶llig wertlos.,"[-0.04944421  0.03870133 -0.03033591 ... -0.01868011 -0.03437295
+ -0.04940313]"
+NEOFFI27,NEO,Extraversion,"Ich ziehe es gewÃ¶hnlich vor, Dinge allein zu tun.","[-0.01685855  0.0426954  -0.07159813 ... -0.03802554 -0.04430564
+ -0.00993338]"
+NEOFFI28,NEO,Openness,Ich probiere oft neue und fremde Speisen aus.,"[-0.03652765 -0.00295935 -0.03649281 ... -0.01319715 -0.02196387
+  0.00224438]"
+NEOFFI29,NEO,Agreeableness,"Ich glaube, dass man von den meisten Leuten ausgenutzt wird, wenn man es zulÃ¤sst.","[-0.03631853  0.04808925 -0.0750889  ... -0.02178847  0.00119726
+ -0.00166941]"
+NEOFFI30,NEO,Conscientiousness,"Ich vertrÃ¶dele eine Menge Zeit, bevor ich mit einer Arbeit beginne.","[-0.01518067  0.0310111  -0.05294761 ... -0.05995633 -0.03822323
+ -0.00770839]"
+NEOFFI31,NEO,Neuroticism,Ich empfinde selten Furcht oder Angst.,"[-0.03798907  0.00588661 -0.05412874 ...  0.01884271 -0.02387328
+ -0.02539845]"
+NEOFFI32,NEO,Extraversion,"Ich habe oft das GefÃ¼hl, vor Energie Ã¼berzuschÃ¤umen.","[-0.04157125  0.01846947 -0.05812431 ... -0.01415291 -0.01116788
+ -0.00867648]"
+NEOFFI33,NEO,Openness,"Ich nehme nur selten Notiz von den Stimmungen oder GefÃ¼hlen, die verschiedene Umgebungen hervorrufen.","[-0.04812596  0.00910481 -0.05482477 ...  0.00708751 -0.02830572
+ -0.02536193]"
+NEOFFI34,NEO,Agreeableness,"Die meisten Menschen, die ich kenne, mÃ¶gen mich.","[ 0.01363417  0.03344493 -0.06879397 ... -0.01693253 -0.02215601
+ -0.01371052]"
+NEOFFI35,NEO,Conscientiousness,"Ich arbeite hart, um meine Ziele zu erreichen.","[-0.00831242  0.01436456 -0.06379314 ... -0.02199233 -0.0363734
+ -0.02136648]"
+NEOFFI36,NEO,Neuroticism,"Ich Ã¤rgere mich oft darÃ¼ber, wie andere Leute mich behandeln.","[-0.04690386  0.0426177  -0.04693196 ... -0.04812438  0.00658457
+ -0.03772186]"
+NEOFFI37,NEO,Extraversion,"Ich bin ein frÃ¶hlicher, gut gelaunter Mensch.","[-0.02543519  0.00520368 -0.06819968 ... -0.0287974  -0.05172051
+ -0.05185668]"
+NEOFFI38,NEO,Openness,"Ich glaube, dass wir bei ethischen Entscheidungen auf die Ansichten unserer religiÃ¶sen AutoritÃ¤ten achten sollten.","[-0.01900796 -0.01376609 -0.01369915 ... -0.02769754 -0.03941038
+ -0.00659783]"
+NEOFFI39,NEO,Agreeableness,Manche Leute halten mich fÃ¼r kalt und berechnend.,"[-0.01672868  0.03752429 -0.05400748 ... -0.03683606  0.0165098
+ -0.0075232 ]"
+NEOFFI40,NEO,Conscientiousness,"Wenn ich eine Verpflichtung eingehe, so kann man sich auf mich vestimmt verlassen.","[-0.01402321  0.03921359 -0.0506083  ... -0.02317948 -0.06341396
+ -0.04652726]"
+NEOFFI41,NEO,Neuroticism,"Zu hÃ¤ufig bin ich entmutigt und will aufgeben, wenn etwas schief geht.","[-0.02910594  0.02539055 -0.03615869 ... -0.05789416 -0.01579507
+ -0.02391154]"
+NEOFFI42,NEO,Extraversion,Ich bin kein gut gelaunter Optimist.,"[-0.04941427 -0.00337589 -0.05925836 ... -0.02799423 -0.02435909
+ -0.0483398 ]"
+NEOFFI43,NEO,Openness,"Wenn ich Literatur lese oder ein Kunstwerk betrachte, empfinde ich manchmal ein FrÃ¶steln oder eine Welle der Begeisterung.","[-0.03875681 -0.02619496 -0.02316071 ... -0.00662302 -0.04584178
+ -0.00203306]"
+NEOFFI44,NEO,Agreeableness,In Bezug auf meine Einstellungen bin ich nÃ¼chtern und unnachgiebig.,"[-0.01510676  0.01771257 -0.04514418 ... -0.06307279 -0.02228917
+ -0.03107483]"
+NEOFFI45,NEO,Conscientiousness,"Manchmal bin ich nicht so verlÃ¤sslich oder zuverlÃ¤ssig, wie ich sein sollte.","[-0.03148782  0.02226746 -0.03178742 ... -0.028983   -0.02669501
+ -0.03350811]"
+NEOFFI46,NEO,Neuroticism,Ich bin selten traurig oder deprimiert.,"[-0.03369535 -0.01529321 -0.0446488  ... -0.0001225  -0.02691411
+ -0.05743719]"
+NEOFFI47,NEO,Extraversion,Ich fÃ¼hre ein hektisches Leben.,"[-0.02039956  0.02313892 -0.05406921 ... -0.03009695 -0.03798496
+  0.00432863]"
+NEOFFI48,NEO,Openness,"Ich habe wenig Interesse, Ã¼ber die Natur des Universums oder die Lage der Menschheit zu spekulieren.","[-0.07098166  0.01621371 -0.02331776 ... -0.02673973 -0.01818663
+ -0.02562778]"
+NEOFFI49,NEO,Agreeableness,"Ich versuche, stets rÃ¼cksichtsvoll und sensibel zu handeln.","[-0.04770258  0.02168193 -0.00198011 ... -0.02572443 -0.01011183
+ -0.00639092]"
+NEOFFI50,NEO,Conscientiousness,"Ich bin eine tÃ¼chtige Person, die ihre Arbeit immer erledigt.","[-0.0454147   0.0246789  -0.0607975  ... -0.03569874 -0.06030586
+ -0.03418504]"
+NEOFFI51,NEO,Neuroticism,"Ich fÃ¼hle mich oft hilflos und wÃ¼nsche mir eine Person, die meine Probleme lÃ¶st.","[-0.02838097  0.04355814 -0.04333681 ... -0.0089412  -0.03819476
+ -0.0229814 ]"
+NEOFFI52,NEO,Extraversion,Ich bin ein sehr aktiver Mensch.,"[-0.00461211  0.01930758 -0.06403969 ... -0.03953501 -0.05142156
+ -0.00963114]"
+NEOFFI53,NEO,Openness,Ich bin sehr wissbegierig.,"[-0.04605419  0.01442948 -0.03598515 ... -0.05891008 -0.03265432
+  0.0089561 ]"
+NEOFFI54,NEO,Agreeableness,"Wenn ich Menschen nicht mag, so zeige ich ihnen das auch offen.","[-0.02256847 -0.0076211  -0.02466461 ...  0.00335277 -0.04376255
+ -0.04377834]"
+NEOFFI55,NEO,Conscientiousness,"Ich werde wohl niemals fÃ¤hig sein, Ordnung in mein Leben zu bringen.","[-0.00129254  0.03691928 -0.04108649 ... -0.03439491 -0.00417809
+ -0.01705522]"
+NEOFFI56,NEO,Neuroticism,"Manchmal war mir etwas so peinlich, dass ich mich am liebsten versteckt hÃ¤tte.","[-0.02632346  0.0335885  -0.05094785 ... -0.02048937 -0.02611774
+ -0.03050244]"
+NEOFFI57,NEO,Extraversion,"Lieber wÃ¼rde ich meine eigenen Wege gehen, als eine Gruppe anzufÃ¼hren.","[ 0.00526529  0.00836795 -0.07066086 ... -0.01913464 -0.00299198
+  0.01617553]"
+NEOFFI58,NEO,Openness,"Ich habe oft SpaÃ daran, mit Theorien oder abstrakten Ideen zu spielen.","[-0.06056114 -0.01539007 -0.03103108 ... -0.03413809 -0.00527129
+ -0.01279218]"
+NEOFFI59,NEO,Agreeableness,"Um zu bekommen, was ich will, bin ich notfalls bereit, Menschen zu manipulieren.","[-0.02289371  0.01895109 -0.03122741 ... -0.01825783 -0.01107806
+ -0.02153334]"
+NEOFFI60,NEO,Conscientiousness,"Bei allem, was ich tue, strebe ich nach Perfektion.","[-0.0347972   0.00729018 -0.05317264 ... -0.04123551 -0.04872583
+  0.02723179]"
+NEOFFI61,NEO,Agreeableness,"Oft sind die Menschen nicht so nett, wie sie zu sein scheinen.","[-0.04446307  0.01435853 -0.04672778 ... -0.00042121 -0.01121303
+ -0.06677239]"
+NEOFFI62,NEO,Agreeableness,Ich mache mir keine groÃen Gedanken Ã¼ber Obdachlose.,"[-0.0369799  -0.00786082 -0.05155674 ... -0.00503257 -0.04208652
+ -0.03800489]"
+NEOFFI63,NEO,Conscientiousness,Ich bin kein sehr ordentlicher oder strukturierter Mensch.,"[-0.0005068  -0.00758614 -0.05421572 ... -0.02994958 -0.03198423
+ -0.02451428]"
+NEOFFI64,NEO,Neuroticism,"Ich habe oft das GefÃ¼hl, dass ich nicht so gut bin wie andere.","[-0.04810584  0.00479818 -0.0491249  ... -0.0254885  -0.01534633
+ -0.06675704]"
+NEOFFI65,NEO,Extraversion,Ich bin nicht frÃ¶hlich und unbekÃ¼mmert.,"[-0.03462769  0.00807811 -0.06690503 ... -0.01221657 -0.04308243
+ -0.00242103]"
+NEOFFI66,NEO,Agreeableness,Ich gerate manchmal in Streit.,"[-0.01078445  0.01711539 -0.04950714 ... -0.02896467 -0.00462309
+ -0.03860505]"
