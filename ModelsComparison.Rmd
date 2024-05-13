@@ -205,16 +205,16 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 
 ## Roberta
 
-Roberta performs well, although it is not clear if it supports the German language.
+Roberta performs well.
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- readembeds("embeddings_roberta_de.csv")
+embeddings <- readembeds("embeddings_roberta_multilingual_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-ggsave("subscales_roberta_small.pdf", 
+ggsave("subscales_roberta_multilingual.pdf", 
         plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
         width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
@@ -308,20 +308,15 @@ NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_gecko <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- readembeds("embeddings_roberta_de.csv")
-NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
-PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
-
 embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_USE <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- readembeds("embeddings_mistral_de.csv")
+embeddings <- readembeds("embeddings_roberta_multilingual_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-distmx_mistral <- crcosdist(embmx(NEO), embmx(PID))
+distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
 
 embeddings <- readembeds("embeddings_alephalpha_base_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
@@ -330,7 +325,7 @@ distmx_alephalpha <- crcosdist(embmx(NEO), embmx(PID))
 
 distmx_pooled <- (scale(distmx_openAI) + scale(distmx_gecko) + 
                     scale(distmx_roberta) + scale(distmx_USE) + 
-                    scale(distmx_mistral) + scale(distmx_alephalpha)) / 5
+                    scale(distmx_alephalpha)) / 5
 
 cordata_pooled <- getcordata(distmx_pooled)
 plotfunc(cordata_pooled)
