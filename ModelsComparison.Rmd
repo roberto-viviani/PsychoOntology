@@ -42,7 +42,7 @@ plotfunc <- function(data) {
   p
 }
 
-# model and inference. Cosine distance multiplied by 10 to have coefs for 0.1 cosine
+# model and inference. Cosine distance standardized
 testfunc <- function(data) {
   summary(glm(abs(corr) ~ scale(dist), 
     data = data |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),             family = quasibinomial))
