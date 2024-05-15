@@ -16,7 +16,7 @@ library(dplyr)
 source("embedding_utilities.R") 
 
 #when we read the scales, we drop the extranumerary NEO items
-scales <- read.csv("scales_data.csv") |> tidyr::drop_na() |> select(-NEOFFI61:-NEOFFI66)
+scales <- read.csv("scales_data_extended.csv") |> tidyr::drop_na() |> select(-NEOFFI61:-NEOFFI66)
 getcordata <- function(cdist) {
   cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
       as.matrix(scales |> select(starts_with("PID5BF"))))

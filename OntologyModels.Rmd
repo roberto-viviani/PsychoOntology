@@ -18,7 +18,8 @@ source("embedding_utilities.R")
 embeddings <- loadEmbeddings("embeddings_openAI_large_de.csv")
 
 #when we read the scales, we drop the extranumerary NEO items
-scales <- read.csv("scales_data_extended.csv") |> tidyr::drop_na() |> select(-NEOFFI61:-NEOFFI66)
+scales <- read.csv("scales_data_extended.csv") |>  
+  select(-NEOFFI61:-NEOFFI66) |> tidyr::drop_na()
 cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
     as.matrix(scales |> select(starts_with("PID5BF"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
@@ -45,7 +46,7 @@ source("plot_utilities.R")
 # stat utilities
 source("stats_utilities.R")
 
-pidtraits <- c("PIDAnancasticity", "PIDAntagonism", "PIDDetachment",
+pidtraits <- c("PIDAnankastia", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
 traitnames <- c("Anankastia", "Antagonism", "Detachment",
                "Disinhibition", "NegativeAffect", "Psychoticism")
