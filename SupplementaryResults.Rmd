@@ -73,6 +73,47 @@ traitnames <- c("Anankastia", "Antagonism", "Detachment",
 
 ### General NEO subscale associations
 
+We first compare replicability at sub-scale level (an easier task as the semantic distances are averaged within sub-scales).
+
+```{r}
+p1 <- ggplot(
+  cordata_1 |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = corr, x = dist)) + 
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(aes(color = typeNEO), method = "lm", se = FALSE) + 
+  scale_color_viridis_d() + 
+  labs(color = "NEO trait", shape = "PID domain") + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+
+p2 <- ggplot(
+  cordata_2 |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = corr, x = dist)) + 
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(aes(color = typeNEO), method = "lm", se = FALSE) + 
+  scale_color_viridis_d() + 
+  labs(color = "NEO trait", shape = "PID domain") + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+
+p3 <- ggplot(
+  cordata_3 |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = corr, x = dist)) + 
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(aes(color = typeNEO), method = "lm", se = FALSE) + 
+  scale_color_viridis_d() + 
+  labs(color = "NEO trait", shape = "PID domain") + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+
+ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
+
+```
+
+
+
+We plotted below the relationship between response correlations and semantic distance at the level of individual item pairs (a more difficult task). The cloud of points, each of which is a pair of items, resembles a wedge pointing to the right. At semantic distances of 0.7 or higher, there was very little systematic correlation between responses. However, there were also several cases of item pairs that the language model judged to have semantic distances of 0.4 or less but gave rise to no correlation in the responses of participants. These are items pairs located in the middle of the left part of the wedge. Here, the model appears to fail to detect the semantic distance of items whose answers showed no correlation. Furthermore, for conscientiousness the correlation does not stop at zero at large semantic distances but becomes negative (see text for further analysis).
+
 ```{r main, message = FALSE}
 
 p1 <- ggplot(cordata_1, aes(cosdist, corrs, color = typeNEO)) +  
