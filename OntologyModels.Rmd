@@ -101,6 +101,23 @@ summary(glm(abs(corr) ~ dist,
 
 In general, the closer the semantic relatedness of items of the respective subscales and traits, the stronger the correlations in the answers of participants (t = -5.5, p < 0.001). We also see that the strongest correlation, given by neuroticism and negative affect, was also accompanied by a short semantic distance between the items of the respective scales. However, the amount of correlation is somewhat higher than we would expect from a linear prediction from the amount of semantic relatedness. We can see also that conscientiousness departed from this pattern. However, the semantic construct implied by the conscientiousness items appears to be heterogeneous. As described in the literature, openness to experience was not related to PID dimensions. We see that in both its large semantic distance and low correlation with total PID scores.
 
+The association between response correlations and semantic similarity is detected even when the scales have opposite directions:
+
+```{r, message = FALSE}
+ggplot(
+  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
+  aes(y = corr, x = dist)) + 
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
+  geom_smooth(aes(color = typeNEO), method = "lm", se = FALSE) + 
+  scale_color_viridis_d() + 
+  labs(color = "NEO trait", shape = "PID domain") + 
+  xlab("semantic distance") + ylab("avg correlation") + theme_classic()
+ggsave("subscales_signed_openAI_large.pdf", width = 150, height = 95, units = "mm")
+
+```
+
+
 ## Association of individual items in the NEO subscales
 
 In the following plots, we display the correlation of pairs of individual items on the cosine distance of embeddings to visualize the relation between semantic relatedness and correlation at a smaller level of granualarity. We use color to differentiate the PID facets, and plot the relationship between pairs with curves grouped by NEO subscales (which have different directions).
