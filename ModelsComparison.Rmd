@@ -236,6 +236,21 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+## distiluse
+
+Like Roberta, this is a freely available model.
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_distiluse_cased_v1_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
 ## bert German (msmarco)
 
 Like Roberta, this is a freely available model.
@@ -356,6 +371,11 @@ NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_gecko <- crcosdist(embmx(NEO), embmx(PID))
 
+embeddings <- readembeds("embeddings_alephalpha_base_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+distmx_alephalpha <- crcosdist(embmx(NEO), embmx(PID))
+
 embeddings <- readembeds("embeddings_univSentEncoder_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
@@ -366,14 +386,16 @@ NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 distmx_roberta <- crcosdist(embmx(NEO), embmx(PID))
 
-embeddings <- readembeds("embeddings_alephalpha_base_de.csv")
+embeddings <- readembeds("embeddings_distiluse_cased_v1_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
-distmx_alephalpha <- crcosdist(embmx(NEO), embmx(PID))
+distmx_siamBERT <- crcosdist(embmx(NEO), embmx(PID))
+
+rm(embeddings)
 
 distmx_pooled <- (scale(distmx_openAI) + scale(distmx_gecko) + 
-                    scale(distmx_roberta) + scale(distmx_USE) + 
-                    scale(distmx_alephalpha)) / 5
+                    +scale(distmx_roberta) + scale(distmx_alephalpha) + 
+                    scale(distmx_siamBERT)) + scale(distmx_USE) / 6
 
 cordata_pooled <- getcordata(distmx_pooled)
 plotfunc(cordata_pooled)
