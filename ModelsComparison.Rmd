@@ -2,7 +2,9 @@
 title: "Models comparison"
 author: "Roberto"
 date: "2024-04-22"
-output: word_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 We test the extent to which semantic similarity predicts the respondent correlation of answers across subscales using different large language models.
@@ -119,9 +121,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-ggsave("subscales_mistral.pdf",         
-       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+#ggsave("subscales_mistral.pdf",         
+#       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -135,9 +137,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-ggsave("subscales_mistral.pdf",         
-       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+#ggsave("subscales_alephalpha_base_128.pdf",         
+#       plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#       width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
@@ -247,13 +249,16 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
+ggsave("subscales_distiluse_bert_multilingual.pdf", 
+        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
 ## bert German (msmarco)
 
-Like Roberta, this is a freely available model.
+Like Roberta, this is a freely available model. Nothing to gain here.
 
 ```{r, message = FALSE, warning = FALSE}
 embeddings <- readembeds("embeddings_bert_msmarco_de.csv")
@@ -292,9 +297,9 @@ PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
 
 plotfunc(cordata)
-ggsave("subscales_E5_multilingual.pdf", 
-        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
-        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
+#ggsave("subscales_E5_multilingual.pdf", 
+#        plot = plotfunc(cordata) + guides("color" = "none", "shape" = "none"),
+#        width = 150 * 2 / 3, height = 95 * 3 / 4, units = "mm")
 testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
