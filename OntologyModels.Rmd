@@ -121,7 +121,7 @@ ggsave("subscales_signed_openAI_large.pdf", width = 150, height = 95, units = "m
 
 ## Association of individual items in the NEO subscales
 
-In the following plots, we display the correlation of pairs of individual items on the cosine distance of embeddings to visualize the relation between semantic relatedness and correlation at a smaller level of granualarity. We use color to differentiate the PID facets, and plot the relationship between pairs with curves grouped by NEO subscales (which have different directions).
+In the following plots, we display the correlation of pairs of individual items on the cosine distance of embeddings to visualize the relation between semantic relatedness and correlation at a smaller level of granualarity. These plots, not shown in the main text for reasons of space, complement those shown there (the main text shows plot where each point is a pair of subscales, not of items). We used color to differentiate the PID facets, and plot the relationship between pairs with curves grouped by NEO subscales (which have different directions).
 
 ```{r embed_x_corr, message = FALSE }
 
@@ -146,11 +146,11 @@ neocolours <- unique(layer_data()$colour)
 
 To interpret these plots it is important to remember that each point represents a pair of scale items, one from the NEO inventory and one from the PID scale, from which we take the correlation of responses and the semantic distance. Therefore, as there are 66 NEO items in this database and 36 PID items, there are 66 x 36 = 2376 points in total.
 
-The first plot demonstrates the diverging relationship between semantic distance and response correlations. At low semantic distance, correlations diverged widely due in part to the fact that some have opposite directions. At high semantic distances, in contrast, we see that the correlations narrowed around the zero point.
+The first plot demonstrates that at low semantic distance, correlations started to diverge and show larger positive as well as negative values. At high semantic distances, in contrast, we see that the correlations became closer to the zero point. As a result, this plot takes the form of a wedge pointing to the right. In the supplementary results B, we repeat this plot to show its replicability. There, we also show how the points at low semantic distance and low correlation become less in embeddings that show a good association between semantic distance and response correlations. These points may be a sign that the language model had difficulties in detecting semantic differences in sentences that were different enough to produce no correlation in the responses of participants.
 
 The second plot considers the absolute values of the correlations, to eliminate the obfuscating role of scale items with similar meaning but opposite polarity. This plot shows the extent to which low semantic distance was associated with varying degrees of association in the participant responses. From the fitted responses (obtained with a logistic binomial regression), however, it is clear that on average correlation increased with low semantic distance. Furthermore, we see that neuroticism displayed the strongest association with semantic similarity, and openness to experience the lowest.
 
-To obtain insight on the items driving these associations, we turn to examining each NEO subscale in turn, avoiding the excessive clutter from the large number of item pairs.
+To obtain insight on the items driving these associations, we examined each NEO subscale in turn, avoiding the excessive clutter from the large number of item pairs. The following section reports all statistics computed for the NEO subscale (to complement the main text reporting only the most salient results), and details on the individual item pairs that showed conspicuous associations in the plots.
 
 ### Neuroticism
 
