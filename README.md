@@ -4,7 +4,7 @@ Using a dataset of responses to scale items, different AI-driven strategies are 
 
 # Files
 
-The following files are for the supplementary results/submssion only
+The following files are for the supplementary results/submission only
 
 AnalysisMain.Rmd
 AnalysisComparison.Rmd
