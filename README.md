@@ -8,3 +8,5 @@ The following files are for the supplementary results/submssion only
 
 AnalysisMain.Rmd
 AnalysisComparison.Rmd
+SupplementaryResults_A.Rmd
+SupplementaryResults_B.Rmd
