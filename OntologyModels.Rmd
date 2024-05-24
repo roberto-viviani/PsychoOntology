@@ -258,7 +258,9 @@ p + geom_text(data = filter(plotdata,
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3)
 ```
 
-A major discrepancy concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
+We see here that the discrepancy between low semantic distance according to the model, and the lack of response correlations, concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
+
+Among the items that drove the association between extraversion and detachment there were NEOFFI27, "I usually prefer to do things alone" ("Ich ziehe es gewöhnlich vor, Dinge allein zu tun"), which was similar (and correlated in responses) with PID5BF22 ("I don't like spending time with others", "Ich mag es nicht, Zeit mit andered zu verbringen"); NEOFFI02, "I loke to have a lot of people around me", ("Ich habe gerne viele Leute um mich herum"), which was deemed semantically similar and correlated in responses with PID5BF22 ("I don't like spending time with others", Ich mag es nicht, Zeit mit anderen zu verbringen").
 
 ### Conscientiousness
 
@@ -426,6 +428,13 @@ ggsave("agreeableness_openAI_large.pdf", width = 140, height = 120, units = "mm"
 
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
+```
+
+The item that was responsible for this association was NEOFFI19, "I would rather cooperate with others than compete with them" ("Ich würde lieber mit anderen zusammenarbeiten, als mit ihnen zu wetteifern") which was semantically related to PID5BF26, "I'll stretch the truth if it's to my advantage" ("Ich biege mir die Wahrheit zurecht, wenn es zu meinem Vorteil ist") and 20, "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen").
+
+```{r agreeableness_items}
+p + geom_text(data = filter(plotdata, cosdist < 0.45), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.3)
 ```
 
 ### Openness to experience
