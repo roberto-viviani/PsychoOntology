@@ -1,13 +1,13 @@
 ---
 title: "Models comparison"
-author: "Roberto"
+author: "Roberto Viviani, University of Innsbruck"
 date: "2024-04-22"
 output:
   html_document:
     df_print: paged
 ---
 
-We test the extent to which semantic similarity predicts the respondent correlation of answers across subscales using different large language models.
+We test here the extent to which semantic similarity predicts the respondent correlation of answers across subscales using different large language models.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
