@@ -136,7 +136,7 @@ ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 
 ```
 
-Note here that the universal sentence encoder puts more item pairs in the middle of the plot on the left border, where semantic distance is low and correlation is about zero. This may be an index of failure in assessing the semantic distinctness of items to which participants gave responses that were not correlated. In this respect, gecko appears to perform best even if the significance of the association between response correlations and semantic distances is slightly lower than open AI in the logistic binomial model (see main text). As a result, extraversion becomes negatively associated with the PIDS rather than being flat as in the open AI model. Openness to experience remains flat.
+Note here that the universal sentence encoder puts more item pairs in the middle of the plot on the left border, where semantic distance is low and correlation is about zero. This may be an index of failure in assessing the semantic distinctness of items to which participants gave responses that were not correlated. In low performing models, we saw the wedge-formed cloud loose the wedge form, and become an formless blob. In this respect, gecko appears to perform best even if the significance of the association between response correlations and semantic distances is slightly lower than open AI in the logistic binomial model (see main text). As a result, extraversion becomes negatively associated with the PIDS rather than being flat as in the open AI model. Openness to experience remains flat.
 
 ### Neuroticism
 
