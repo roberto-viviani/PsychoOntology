@@ -1,15 +1,16 @@
 ---
 title: "Supplementary results A"
-author: "Roberto Viviani, University of Innsbruck"
+author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
-output:
-  html_document:
-    df_print: paged
+output: pdf_document
+fontsize: 10pt
 ---
 
 ```{r setup, echo=FALSE, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.dim = c(8,5.2))
 library(ggplot2)
+library(ggpubr)
+
 library(dplyr)
 library(tidyr)
 
@@ -61,29 +62,29 @@ In the following plots, we display the correlation of pairs of individual items 
 ```{r embed_x_corr, message = FALSE }
 
 library(ggplot2)
-ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
+p1 <- ggplot(cordata, aes(cosdist, corrs, color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "lm", se = F, alpha = 0.5) + 
   geom_point(shape=21, alpha = 0.5) +
   scale_color_viridis_d(name = "NEO trait") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
-ggsave("items_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
-ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
+p2 <- ggplot(cordata, aes(cosdist, abs(corrs), color = typeNEO)) +  
   geom_smooth(aes(group = typeNEO), method = "glm", 
               method.args = c("family"="quasibinomial"), se = F) + 
   geom_point(shape=21, alpha = 0.5) +
   scale_color_viridis_d(name = "NEO trait") + 
   xlab('semantic distance') + ylab('responses correlation') + theme_classic()
 neocolours <- unique(layer_data()$colour)
-#ggsave("items_abs_openAI_large.pdf", width = 150, height = 95, units = "mm")
+
+ggarrange(p1, p2, ncol=2, nrow=1, common.legend = TRUE, legend = "right")
 
 ```
 
 To interpret these plots it is important to remember that each point represents a pair of scale items, one from the NEO inventory and one from the PID scale, from which we take the correlation of responses and the semantic distance. Therefore, as there are 66 NEO items in this database and 36 PID items, there are 66 x 36 = 2376 points in total.
 
-The first plot demonstrates that at low semantic distance, correlations started to diverge and show larger positive as well as negative values. At high semantic distances, in contrast, we see that the correlations became closer to the zero point. As a result, this plot takes the form of a wedge pointing to the right. In the supplementary results B, we repeat this plot to show its replicability. There, we also show how the points at low semantic distance and low correlation become less in embeddings that show a good association between semantic distance and response correlations. These points may be a sign that the language model had difficulties in detecting semantic differences in sentences that were different enough to produce no correlation in the responses of participants.
+The plot on the left demonstrates that at low semantic distance, correlations started to diverge and show larger positive as well as negative values. At high semantic distances, in contrast, we see that the correlations became closer to the zero point. As a result, this plot takes the form of a wedge pointing to the right. In the supplementary results B, we repeat this plot to show its replicability. There, we also show how the points at low semantic distance and low correlation become less in embeddings that show a good association between semantic distance and response correlations. These points may be a sign that the language model had difficulties in detecting semantic differences in sentences that were different enough to produce no correlation in the responses of participants.
 
-The second plot considers the absolute values of the correlations, to eliminate the obfuscating role of scale items with similar meaning but opposite polarity. This plot shows the extent to which low semantic distance was associated with varying degrees of association in the participant responses. From the fitted responses (obtained with a logistic binomial regression), however, it is clear that on average correlation increased with low semantic distance. Furthermore, we see that neuroticism displayed the strongest association with semantic similarity, and openness to experience the lowest.
+The plot on the right considers the absolute values of the correlations, to eliminate the obfuscating role of scale items with similar meaning but opposite polarity. This plot shows the extent to which low semantic distance was associated with varying degrees of association in the participant responses. From the fitted responses (obtained with a logistic binomial regression), however, it is clear that on average correlation increased with low semantic distance. Furthermore, we see that neuroticism displayed the strongest association with semantic similarity, and openness to experience the lowest.
 
 To obtain insight on the items driving these associations, we examined each NEO subscale in turn, avoiding the excessive clutter from the large number of item pairs. The following section reports all statistics computed for the NEO subscale (to complement the main text reporting only the most salient results), and details on the individual item pairs that showed conspicuous associations in the plots.
 
@@ -99,8 +100,8 @@ We first look at the correlations between neuroticism and PID domains in the dat
 
 ```{r neuro_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOneuro", pidtraits)
-print(corrs)
 p <- barplf(corrs, "Neuroticism"); p
+print(corrs)
 
 ```
 
@@ -108,9 +109,6 @@ Only antagonism is not related to neuroticism, but the major associations are wi
 
 ```{r neuroticism, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Neuroticism")
-p <- bxplf(plotdata); p
-anovadist(plotdata)
-
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Detachment")
@@ -137,8 +135,8 @@ Extraversion was associated with the PID domains detachment (as one would expect
 
 ```{r extraversion_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOextra", pidtraits)
-print(corrs)
 p <- barplf(corrs, "Extraversion"); p
+print(corrs)
 
 ```
 
@@ -146,9 +144,6 @@ Extraversion appears to be characterized by the selective negative association o
 
 ```{r extraversion, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Extraversion")
-p <- bxplf(plotdata); p
-anovadist(plotdata)
-
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2)), 
@@ -172,17 +167,14 @@ For conscientiousness, we can show that with lower semantic distance the associa
 
 ```{r conscientiousness_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOgew", pidtraits)
-print(corrs)
 p <- barplf(corrs, "Conscientiousness"); p
+print(corrs)
 
 ```
 
 
 ```{r conscientiousness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Conscientiousness")
-p <- bxplf(plotdata); p
-anovadist(plotdata)
-
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anankastia")
 p <- addneoline(p, plotdata, "Disinhibition")
@@ -273,8 +265,8 @@ Agreeableness has widespread negative associations with PID domains, but as expe
 
 ```{r agreeableness_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOvertr", pidtraits)
-print(corrs)
 p <- barplf(corrs, "Agreeableness"); p
+print(corrs)
 
 ```
 
@@ -282,10 +274,6 @@ We see that the associations with manipulativeness and deceitfulness are partly 
 
 ```{r agreeableness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Agreeableness")
-p <- bxplf(plotdata); p
-
-anovadist(plotdata)
-
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")
 p <- addneoline(p, plotdata, "Psychoticism")
@@ -306,20 +294,13 @@ Finally, we show what appears to be a genuine association between low openness a
 
 ```{r openness_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOoff", pidtraits)
-print(corrs)
 p <- barplf(corrs, "Openness"); p
+print(corrs)
 
 ```
 
 ```{r openness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Openness")
-p <- bxplf(plotdata); p
-ggsave("openness_openAI_large_boxes.pdf", 
-       plot = p + labs(title = NULL) + theme(legend.position = "null", 
-                        text = element_text(size = 14)), 
-       width = 45, height = 60, units = "mm")
-anovadist(plotdata)
-
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "Psychoticism")
