@@ -31,8 +31,8 @@ co = cohere.Client(api_key)
 # get embeddings
 response = co.embed(
     texts=list(data.item), 
-    model="embed-english-v3.0", 
-    input_type="classification"
+    model="embed-multilingual-v3.0", 
+    input_type="classification"  # or clustering etc.
 )
 
 # collect embeddings from response and save them to the embeddings file
