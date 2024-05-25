@@ -131,7 +131,8 @@ rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ## Cohere
 
 ```{r, message = FALSE, warning = FALSE}
-embeddings <- readembeds("embeddings_cohere_de.csv")
+#Cohere for clustering and for classification are very similar
+embeddings <- readembeds("embeddings_cohere_clust_de.csv")
 NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
 PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
 cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
