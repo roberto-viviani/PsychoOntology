@@ -128,6 +128,19 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+## Cohere
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_cohere_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
 ## Aleph Alpha base compressed
 
 ```{r, message = FALSE, warning = FALSE}
