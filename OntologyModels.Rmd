@@ -179,6 +179,10 @@ ggsave("neuroticism_openAI_large_boxes.pdf",
        width = 45, height = 60, units = "mm")
 anovadist(plotdata)
 
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Detachment")
@@ -235,6 +239,10 @@ ggsave("extraversion_openAI_large_boxes.pdf",
        width = 45, height = 60, units = "mm")
 anovadist(plotdata)
 
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ r + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2)), 
@@ -287,6 +295,10 @@ ggsave("conscientiousness_openAI_large_boxes.pdf",
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anankastia")
@@ -416,6 +428,10 @@ ggsave("agreeableness_openAI_large_boxes.pdf",
        width = 45, height = 60, units = "mm")
 anovadist(plotdata)
 
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")
 p <- addneoline(p, plotdata, "Psychoticism")
@@ -461,6 +477,10 @@ ggsave("openness_openAI_large_boxes.pdf",
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
