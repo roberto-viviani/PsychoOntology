@@ -113,6 +113,7 @@ Please see the separate markdown AnalysisComparison.
 ### Neuroticism
 
 ```{r neuro_model, message = FALSE }
+# conventional test of correlations between NEO trait and PID domains
 corrs <- pearscorr(scales, "NEOneuro", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Neuroticism"); p
@@ -131,7 +132,13 @@ ggsave("neuroticism_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+
+# test of variance to see if semantic distances differ in PID traits
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
@@ -170,7 +177,13 @@ ggsave("extraversion_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+
+# test of variance to see if semantic distances differ in PID traits
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
@@ -185,10 +198,10 @@ pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from
 
 ```
 
-
 ### Conscientiousness
 
 ```{r conscientiousness_model, message = FALSE }
+# conventional test of correlations between NEO trait and PID domains
 corrs <- pearscorr(scales, "NEOgew", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Conscientiousness"); p
@@ -208,7 +221,13 @@ ggsave("conscientiousness_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+
+# test of variance to see if semantic distances differ in PID traits
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anankastia")
@@ -265,6 +284,7 @@ ggsave("conscientiousness_detail_openAI_large_en.pdf", width = 100, height = 60,
 ### Agreeableness
 
 ```{r agreeableness_model, message = FALSE }
+# conventional test of correlations between NEO trait and PID domains
 corrs <- pearscorr(scales, "NEOvertr", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Agreeableness"); p
@@ -284,7 +304,13 @@ ggsave("agreeableness_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+
+# test of variance to see if semantic distances differ in PID traits
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")
@@ -304,6 +330,7 @@ pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from
 ### Openness to experience
 
 ```{r openness_model, message = FALSE }
+# conventional test of correlations between NEO trait and PID domains
 corrs <- pearscorr(scales, "NEOoff", pidtraits)
 print(corrs)
 p <- barplf(corrs, "Openness"); p
@@ -322,7 +349,13 @@ ggsave("openness_openAI_large_boxes.pdf",
        plot = p + labs(title = NULL) + theme(legend.position = "null", 
                         text = element_text(size = 14)), 
        width = 45, height = 60, units = "mm")
+
+# test of variance to see if semantic distances differ in PID traits
 anovadist(plotdata)
+
+# test of association between NEO correlations and semantic distance
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
