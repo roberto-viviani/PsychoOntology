@@ -96,7 +96,7 @@ We also plot the associations between semantic similargy and reponse correlation
 
 ### Neuroticism
 
-We first look at the correlations between neuroticism and PID domains in the data.
+We first look at the correlations between neuroticism and PID domains in the data. In these and the following correlations, the stars denote significance at Bonferroni-corrected levels for the combinations of NEO traits and PID domains (* = p < 0.05; ** = p < 0.01; *** = p < 0.001).
 
 ```{r neuro_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOneuro", pidtraits)
