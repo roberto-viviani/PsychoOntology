@@ -20,9 +20,11 @@ library(tidyr)
 source("embedding_utilities.R") 
 embeddings <- loadEmbeddings("embeddings_openAI_large_de.csv")
 
-#when we read the scales, we drop the extranumerary NEO items
-scales <- read.csv("scales_data_extended.csv") |>  
-  select(-NEOFFI61:-NEOFFI66)
+#we read the participant scores (only PID and NEO scores)
+#the data are not available in the repository because of data privacy constraints
+scales <- read.csv("scales_data_extended.csv")
+
+#correlation of responses between PID and NEO items
 cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
     as.matrix(scales |> select(starts_with("PID5BF"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
@@ -53,6 +55,13 @@ pidtraits <- c("PIDAnankastia", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
 traitnames <- c("Anankastia", "Antagonism", "Detachment",
                "Disinhibition", "NegativeAffect", "Psychoticism")
+neonames <- c("NEOvertr", "NEOgew", "NEOextra", "NEOneuro", "NEOoff")
+neotraits <-c("NEOvertr" = "agreeableness", 
+              "NEOgew" = "conscientiousness", 
+              "NEOextra" = "extraversion", 
+              "NEOneuro" = "neuroticism", 
+              "NEOoff" = "openness")
+
 ```
 
 ## Semantic analysis and prediction of association of responses between scales
@@ -60,13 +69,20 @@ traitnames <- c("Anankastia", "Antagonism", "Detachment",
 ### Figure 1
 
 ```{r, message = FALSE}
-ggplot(
-  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
-  aes(y = corr, x = traitPID, fill = typeNEO)) + 
-  geom_col(position = "dodge", alpha = 0.8, color = "white") +
+txt <- data.frame()
+for (pid in pidtraits) {
+  tx <- pearscorr(scales, pid, neonames)
+  tx[,"PIDdomain"] <- pid
+  tx[,"NEOtrait"] <- neotraits[row.names(tx)]
+  row.names(tx) <- NULL
+  tx <- tx[,c("PIDdomain", "NEOtrait", "r", "t", "p", "pcorr")]
+  txt <- rbind(txt,tx)
+}
+ggplot(txt, aes(y = r, x = PIDdomain, fill = NEOtrait)) + 
+  geom_col(position = "dodge") +
   scale_fill_viridis_d() + 
   labs(fill = "NEO trait") + 
-  xlab("PID domain") + ylab("avg correlation") + theme_grey() + 
+  xlab("PID domain") + ylab("correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ggsave("PIDxNEO.pdf", width = 150, height = 95, units = "mm")
 

@@ -17,9 +17,10 @@ library(tidyr)
 source("embedding_utilities.R") 
 embeddings <- loadEmbeddings("embeddings_openAI_large_de.csv")
 
-#when we read the scales, we drop the extranumerary NEO items
-scales <- read.csv("scales_data_extended.csv") |>  
-  select(-NEOFFI61:-NEOFFI66)
+#read in scales
+scales <- read.csv("scales_data_extended.csv") 
+
+# correlation responses 
 cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
     as.matrix(scales |> select(starts_with("PID5BF"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
@@ -50,32 +51,35 @@ pidtraits <- c("PIDAnankastia", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
 traitnames <- c("Anankastia", "Antagonism", "Detachment",
                "Disinhibition", "NegativeAffect", "Psychoticism")
+neonames <- c("NEOvertr", "NEOgew", "NEOextra", "NEOneuro", "NEOoff")
+neotraits <-c("NEOvertr" = "agreeableness", 
+              "NEOgew" = "conscientiousness", 
+              "NEOextra" = "extraversion", 
+              "NEOneuro" = "neuroticism", 
+              "NEOoff" = "openness")
+
 ```
 
 The question that naturally arises is the extent to which semantic similarity explains the correlation between scales. The average correlation between NEO and PID scales, computed from the correlation of the items, is shown in the following figures.
 
 ```{r, message = FALSE}
-ggplot(
-  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
-  aes(y = corr, x = typeNEO, fill = traitPID, group = traitPID)) + 
-  geom_col(position = "dodge", alpha = 0.8) +
-  #scale_fill_brewer(type = "seq", palette = 3, direction = -1) + 
-  scale_fill_viridis_d(option = "H") +
-  labs(fill = "PID domain") + 
-  xlab("NEO trait") + ylab("avg correlation") + theme_grey() + 
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-#decomment ggsave lines to save pdf's
-#ggsave("NEOxPID.pdf", width = 150, height = 95, units = "mm")
-
-ggplot(
-  cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs)),
-  aes(y = corr, x = traitPID, fill = typeNEO)) + 
-  geom_col(position = "dodge", alpha = 0.8, color = "white") +
+txt <- data.frame()
+for (pid in pidtraits) {
+  tx <- pearscorr(scales, pid, neonames)
+  tx[,"PIDdomain"] <- pid
+  tx[,"NEOtrait"] <- neotraits[row.names(tx)]
+  row.names(tx) <- NULL
+  tx <- tx[,c("PIDdomain", "NEOtrait", "r", "t", "p", "pcorr")]
+  txt <- rbind(txt,tx)
+}
+ggplot(txt, aes(y = r, x = PIDdomain, fill = NEOtrait)) + 
+  geom_col(position = "dodge") +
   scale_fill_viridis_d() + 
   labs(fill = "NEO trait") + 
-  xlab("PID domain") + ylab("avg correlation") + theme_grey() + 
+  xlab("PID domain") + ylab("correlation") + theme_grey() + 
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-ggsave("PIDxNEO.pdf", width = 150, height = 95, units = "mm")
+
+print(txt)
 
 ```
 

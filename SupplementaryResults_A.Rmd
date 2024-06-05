@@ -18,9 +18,11 @@ library(tidyr)
 source("embedding_utilities.R") 
 embeddings <- loadEmbeddings("embeddings_openAI_large_de.csv")
 
-#when we read the scales, we drop the extranumerary NEO items
-scales <- read.csv("scales_data_extended.csv") |>  
-  select(-NEOFFI61:-NEOFFI66)
+#we read the participant scores (only PID and NEO scores)
+#the data are not available in the repository because of data privacy constraints
+scales <- read.csv("scales_data_extended.csv")
+
+#correlation of responses between PID and NEO items
 cormx <- cor(as.matrix(scales |> select(starts_with("NEOFFI"))), 
     as.matrix(scales |> select(starts_with("PID5BF"))))
 cordata <- data.frame(corrs = as.vector(cormx), cosdist = as.vector(embeddings$cdist),
