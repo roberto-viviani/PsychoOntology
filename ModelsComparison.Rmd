@@ -237,7 +237,7 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
-## all-mpnet-base-v2
+## all-mpnet-base-v2 (paraphrase)
 
 Like Roberta, this is a freely available model.
 

@@ -7,7 +7,7 @@ output:
     df_print: paged
 ---
 
-We present here the code used to generate Figure 2 and Table 1 of the manuscript "AI-driven assessment of semantic similarity and association of responses between the 'Big Five' and DSM-5/ICD-11 personality traits", by Karin Labek, Sandra Bennett-Long, and Roberto Viviani. See AnalysisMain.Rmd for the remaining results.
+We present here the code used to generate Table 1 and Figure 2 of the manuscript "AI-driven assessment of semantic similarity and association of responses between the 'Big Five' and DSM-5/ICD-11 personality traits", by Karin Labek, Sandra Bennett-Long, and Roberto Viviani. See AnalysisMain.Rmd for the remaining results.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -155,6 +155,46 @@ testfunc(cordata)
 rm(list = c("embeddings", "NEO", "PID", "cordata"))
 ```
 
+## mpnet
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_mpnetbasev2_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+## BGE M3
+
+Another freely available BERT model.
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_BGEM3_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
+
+## jina
+
+```{r, message = FALSE, warning = FALSE}
+embeddings <- readembeds("embeddings_jinav2base_de.csv")
+NEO <- filter(embeddings, scaleID == "NEO") |> select(itemID, type, embedding)
+PID <- filter(embeddings, scaleID == "PID") |> select(itemID, type, embedding)
+cordata  <- getcordata(crcosdist(embmx(NEO), embmx(PID)))
+
+plotfunc(cordata)
+testfunc(cordata)
+rm(list = c("embeddings", "NEO", "PID", "cordata"))
+```
 
 ## Universal Sentence Encoder
 
