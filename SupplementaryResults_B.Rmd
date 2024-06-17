@@ -47,8 +47,9 @@ getassocmx <- function(embeddings, scales) {
   cordata
 }
 
-scales <- read.csv("scales_data_extended.csv") |> tidyr::drop_na() |>
-    select(-NEOFFI61:-NEOFFI66)
+#we read the participant scores (only PID and NEO scores)
+#the data are not available in the repository because of data privacy constraints
+scales <- read.csv("scales_data_extended.csv")
 
 # load embeddings from models
 cordata_1 <- getassocmx(loadEmbeddings("embeddings_openAI_large_de.csv"), scales)
