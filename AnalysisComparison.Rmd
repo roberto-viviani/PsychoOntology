@@ -3,6 +3,7 @@ title: "Models comparison"
 author: "Roberto Viviani, University of Innsbruck"
 date: "2024-04-22"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---

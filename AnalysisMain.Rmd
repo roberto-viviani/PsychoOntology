@@ -3,6 +3,7 @@ title: "Ontology Models"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
 output:
+  pdf_document: default
   html_document:
     df_print: paged
 ---
