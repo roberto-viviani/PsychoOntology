@@ -489,7 +489,8 @@ summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "Psychoticism")
-p + geom_text(data = filter(plotdata, corrs < -0.2), 
+p + geom_text(data = filter(plotdata, corrs < -0.2 | corrs > 0.22 | 
+                              (traitPID == "Psychoticism" & cosdist < 0.5)), 
             aes(label = typePID), alpha = 0.4) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
@@ -502,7 +503,8 @@ pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from
 We can identify the NEO items that are responsible for these associations:
 
 ```{r openness_items, message = FALSE}
-p + geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2), 
+p + geom_text(data = filter(cordata, typeNEO == "Openness", corrs < -0.2 | corrs > 0.22 | 
+                              (traitPID == "Psychoticism" & cosdist < 0.5)), 
             aes(label = paste(itemNEO, itemPID, sep = ":")), alpha = 0.3)
 
 ```

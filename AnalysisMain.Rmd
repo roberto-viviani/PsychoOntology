@@ -121,7 +121,7 @@ ggsave("subscales_signed_openAI_large.pdf", width = 150, height = 95, units = "m
 
 ```
 
-## Figure 2, Table 1
+## Table 1, Figure 2
 
 Please see the separate markdown AnalysisComparison.
 
@@ -377,7 +377,8 @@ summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "Psychoticism")
-p + geom_text(data = filter(plotdata, corrs < -0.2), 
+p + geom_text(data = filter(plotdata, corrs < -0.2 | corrs > 0.22 | 
+                              (traitPID == "Psychoticism" & cosdist < 0.5)), 
             aes(label = typePID), alpha = 0.4) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
 
