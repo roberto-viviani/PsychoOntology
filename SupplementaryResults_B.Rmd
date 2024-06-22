@@ -63,7 +63,7 @@ source("plot_utilities.R")
 # stat utilities
 source("stats_utilities.R")
 
-pidtraits <- c("PIDAnancasticity", "PIDAntagonism", "PIDDetachment",
+pidtraits <- c("PIDAnankastia", "PIDAntagonism", "PIDDetachment",
                "PIDDisinhibition", "PIDNegativeAffect", "PIDPsychoticism")
 traitnames <- c("Anankastia", "Antagonism", "Detachment",
                "Disinhibition", "NegativeAffect", "Psychoticism")
@@ -139,11 +139,15 @@ Note here that the universal sentence encoder puts more item pairs in the middle
 
 ### Neuroticism
 
+Here and in all subsequent sections, printouts of stats table are ordered with OpenAI first, gecko second, and USE third.
+
 ```{r neuroticism, message = FALSE}
 plotdata_1 <- filter(cordata_1, typeNEO == "Neuroticism")
 plotdata_2 <- filter(cordata_2, typeNEO == "Neuroticism")
 plotdata_3 <- filter(cordata_3, typeNEO == "Neuroticism")
 
+# test of variance to see if semantic distance differs in PID traits
+print("Omnibus test of differences in distances NEO/PID")
 chi1 <- anovadist(plotdata_1)$Chisq[2]
 chi2 <- anovadist(plotdata_2)$Chisq[2]
 chi3 <- anovadist(plotdata_3)$Chisq[2]
@@ -157,6 +161,14 @@ p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
 
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of association between NEO correlations and semantic distance
+print("Test of association between NEO correlations and semantic distances")
+corrs <- pearscorr(scales, "NEOneuro", pidtraits)
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_1, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_2, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_3, corrs, by = "traitPID")))
 
 pf <- function(plotdata) {
   p <- baseplot(plotdata)
@@ -190,6 +202,12 @@ p3 <- pf(plotdata_3) +
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
 
+# test of slopes significance in above plots
+print("Tests of significance of slopes (prediction of response associations from semantic similarity")
+pearscorr(plotdata_1 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_2 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_3 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+
 p1 <- pf(plotdata_1) + 
         geom_text(data = filter(plotdata_1,
                                 cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
@@ -219,6 +237,8 @@ plotdata_1 <- filter(cordata_1, typeNEO == "Extraversion")
 plotdata_2 <- filter(cordata_2, typeNEO == "Extraversion")
 plotdata_3 <- filter(cordata_3, typeNEO == "Extraversion")
 
+# test of variance to see if semantic distance differs in PID traits
+print("Omnibus test of differences in distances NEO/PID")
 chi1 <- anovadist(plotdata_1)$Chisq[2]
 chi2 <- anovadist(plotdata_2)$Chisq[2]
 chi3 <- anovadist(plotdata_3)$Chisq[2]
@@ -232,6 +252,14 @@ p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
 
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of association between NEO correlations and semantic distance
+print("Test of association between NEO correlations and semantic distances")
+corrs <- pearscorr(scales, "NEOextra", pidtraits)
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_1, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_2, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_3, corrs, by = "traitPID")))
 
 pf <- function(plotdata) {
   p <- baseplot(plotdata)
@@ -262,6 +290,12 @@ p3 <- pf(plotdata_3) +
         labs(title = models[3])
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of slopes significance in above plots
+print("Tests of significance of slopes (prediction of response associations from semantic similarity")
+pearscorr(plotdata_1 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_2 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_3 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 p1 <- pf(plotdata_1) + 
         geom_text(data = filter(plotdata_1,
@@ -294,6 +328,8 @@ plotdata_1 <- filter(cordata_1, typeNEO == "Conscientiousness")
 plotdata_2 <- filter(cordata_2, typeNEO == "Conscientiousness")
 plotdata_3 <- filter(cordata_3, typeNEO == "Conscientiousness")
 
+# test of variance to see if semantic distance differs in PID traits
+print("Omnibus test of differences in distances NEO/PID")
 chi1 <- anovadist(plotdata_1)$Chisq[2]
 chi2 <- anovadist(plotdata_2)$Chisq[2]
 chi3 <- anovadist(plotdata_3)$Chisq[2]
@@ -307,6 +343,14 @@ p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
 
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of association between NEO correlations and semantic distance
+print("Test of association between NEO correlations and semantic distances")
+corrs <- pearscorr(scales, "NEOgew", pidtraits)
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_1, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_2, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_3, corrs, by = "traitPID")))
 
 pf <- function(plotdata) {
   p <- baseplot(plotdata)
@@ -338,6 +382,12 @@ p3 <- pf(plotdata_3) +
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
 
+# test of slopes significance in above plots
+print("Tests of significance of slopes (prediction of response associations from semantic similarity")
+pearscorr(plotdata_1 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_2 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_3 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+
 p1 <- pf(plotdata_1) + 
         geom_text(data = filter(plotdata_1,
                                 cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
@@ -367,6 +417,8 @@ plotdata_1 <- filter(cordata_1, typeNEO == "Agreeableness")
 plotdata_2 <- filter(cordata_2, typeNEO == "Agreeableness")
 plotdata_3 <- filter(cordata_3, typeNEO == "Agreeableness")
 
+# test of variance to see if semantic distance differs in PID traits
+print("Omnibus test of differences in distances NEO/PID")
 chi1 <- anovadist(plotdata_1)$Chisq[2]
 chi2 <- anovadist(plotdata_2)$Chisq[2]
 chi3 <- anovadist(plotdata_3)$Chisq[2]
@@ -380,6 +432,14 @@ p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
 
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of association between NEO correlations and semantic distance
+print("Test of association between NEO correlations and semantic distances")
+corrs <- pearscorr(scales, "NEOvertr", pidtraits)
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_1, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_2, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_3, corrs, by = "traitPID")))
 
 pf <- function(plotdata) {
   p <- baseplot(plotdata)
@@ -412,6 +472,12 @@ p3 <- pf(plotdata_3) +
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
 
+# test of slopes significance in above plots
+print("Tests of significance of slopes (prediction of response associations from semantic similarity")
+pearscorr(plotdata_1 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_2 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_3 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+
 p1 <- pf(plotdata_1) + 
         geom_text(data = filter(plotdata_1,
                                 cosdist < csbound(plotdata_1) | abs(corrs) > crbound), 
@@ -441,6 +507,8 @@ plotdata_1 <- filter(cordata_1, typeNEO == "Openness")
 plotdata_2 <- filter(cordata_2, typeNEO == "Openness")
 plotdata_3 <- filter(cordata_3, typeNEO == "Openness")
 
+# test of variance to see if semantic distance differs in PID traits
+print("Omnibus test of differences in distances NEO/PID")
 chi1 <- anovadist(plotdata_1)$Chisq[2]
 chi2 <- anovadist(plotdata_2)$Chisq[2]
 chi3 <- anovadist(plotdata_3)$Chisq[2]
@@ -454,6 +522,14 @@ p3 <- bxplf(plotdata_3) + labs(title = models[3]) +
 
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of association between NEO correlations and semantic distance
+print("Test of association between NEO correlations and semantic distances")
+corrs <- pearscorr(scales, "NEOoff", pidtraits)
+corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_1, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_2, corrs, by = "traitPID")))
+summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata_3, corrs, by = "traitPID")))
 
 pf <- function(plotdata) {
   p <- baseplot(plotdata)
@@ -484,6 +560,12 @@ p3 <- pf(plotdata_3) +
         labs(title = models[3])
 mp <- ggarrange(p1, p2, p3, ncol=3, nrow=1, common.legend = TRUE, legend = "right")
 mp
+
+# test of slopes significance in above plots
+print("Tests of significance of slopes (prediction of response associations from semantic similarity")
+pearscorr(plotdata_1 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_2 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
+pearscorr(plotdata_3 |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 p1 <- pf(plotdata_1) + 
         geom_text(data = filter(plotdata_1,
