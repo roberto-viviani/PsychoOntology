@@ -112,14 +112,15 @@ Only antagonism is not related to neuroticism, but the major associations are wi
 ```{r neuroticism, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Neuroticism")
 p <- baseplot(plotdata)
-p <- addneoline(p, plotdata, "NegativeAffect")
-p <- addneoline(p, plotdata, "Detachment")
-p <- addneoline(p, plotdata, "Disinhibition")
-p <- addneoline(p, plotdata, "Antagonism")
+#p <- addneoline(p, plotdata, "NegativeAffect")
+#p <- addneoline(p, plotdata, "Detachment")
+#p <- addneoline(p, plotdata, "Disinhibition")
+#p <- addneoline(p, plotdata, "Antagonism")
 p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
   labs(text = element_text(size = 16)) +
-  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
 
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
@@ -147,21 +148,24 @@ Extraversion appears to be characterized by the selective negative association o
 ```{r extraversion, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Extraversion")
 p <- baseplot(plotdata)
-p <- addneoline(p, plotdata, "Detachment")
+#p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, (cosdist < 0.5 & corrs < -0.2)), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
   labs(text = element_text(size = 16)) +
-  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
 
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 ```
 
-However, the language model also detected a few semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
+Among the items that drove the association between extraversion and detachment there were NEOFFI27, "I usually prefer to do things alone" ("Ich ziehe es gewöhnlich vor, Dinge allein zu tun"), which was similar (and correlated in responses) with PID5BF22 ("I don't like spending time with others", "Ich mag es nicht, Zeit mit andered zu verbringen"); NEOFFI02, "I loke to have a lot of people around me", ("Ich habe gerne viele Leute um mich herum"), which was deemed semantically similar and correlated in responses with PID5BF22 ("I don't like spending time with others", Ich mag es nicht, Zeit mit anderen zu verbringen").
+
+The language model also detected a few semantic affinities between PID items concerning distractibility and emotional lability that were not confirmed by higher response associations.
 
 We see here that the discrepancy between low semantic distance according to the model, and the lack of response correlations, concerned NEOFFI07, "I laugh easily" ("Ich bin leicht zum Lachen zu bringen"), which was considered similar to PID5BF19 emotional lability, "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"), and 33 distractibility, "I am easily distracted" ("Ich lasse mich leicht ablenken").
 
-Among the items that drove the association between extraversion and detachment there were NEOFFI27, "I usually prefer to do things alone" ("Ich ziehe es gewöhnlich vor, Dinge allein zu tun"), which was similar (and correlated in responses) with PID5BF22 ("I don't like spending time with others", "Ich mag es nicht, Zeit mit andered zu verbringen"); NEOFFI02, "I loke to have a lot of people around me", ("Ich habe gerne viele Leute um mich herum"), which was deemed semantically similar and correlated in responses with PID5BF22 ("I don't like spending time with others", Ich mag es nicht, Zeit mit anderen zu verbringen").
+However, these associations could not be replicated in the gecko model (see Supplementary results B). The anomalous association shown here with negative affect, in particular, could not be replicated.
 
 ### Conscientiousness
 
@@ -178,11 +182,12 @@ print(corrs)
 ```{r conscientiousness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Conscientiousness")
 p <- baseplot(plotdata)
-p <- addneoline(p, plotdata, "Anankastia")
-p <- addneoline(p, plotdata, "Disinhibition")
+#p <- addneoline(p, plotdata, "Anankastia")
+#p <- addneoline(p, plotdata, "Disinhibition")
 p + geom_text(data = filter(plotdata, cosdist < 0.45), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) +
-    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+    geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+    geom_smooth(aes(color = traitPID), method = "lm", se = F)
 
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
@@ -277,12 +282,13 @@ We see that the associations with manipulativeness and deceitfulness are partly 
 ```{r agreeableness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Agreeableness")
 p <- baseplot(plotdata)
-p <- addneoline(p, plotdata, "Antagonism")
-p <- addneoline(p, plotdata, "Psychoticism")
-p <- addneoline(p, plotdata, "Detachment")
+#p <- addneoline(p, plotdata, "Antagonism")
+#p <- addneoline(p, plotdata, "Psychoticism")
+#p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, cosdist < 0.5, corrs < -0.2), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) +
-  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+    geom_smooth(aes(color = traitPID), method = "lm", se = F)
 
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
@@ -304,11 +310,12 @@ print(corrs)
 ```{r openness, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Openness")
 p <- baseplot(plotdata)
-p <- addneoline(p, plotdata, "Detachment")
-p <- addneoline(p, plotdata, "Psychoticism")
+#p <- addneoline(p, plotdata, "Detachment")
+#p <- addneoline(p, plotdata, "Psychoticism")
 p + geom_text(data = filter(plotdata, corrs < -0.2), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) +
-  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
 
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
