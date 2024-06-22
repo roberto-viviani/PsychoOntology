@@ -285,7 +285,7 @@ mp
 
 All three models agree on the relationship between extraversion and detachment. Note in particular that the item pairs with the lower semantic distance were the same across models.
 
-In contrast, the relationship between extraversion and negative affect was not consistent between the LLMs. Accoring to the OpenAI model, the correlations invert in sign with larger semantic distance, a symptom of a heterogeneous relationship.
+In contrast, the relationship between extraversion and negative affect was not consistent between the LLMs. According to the OpenAI model, the correlations invert in sign with larger semantic distance, a symptom of a heterogeneous relationship.
 
 ### Conscientiousness
 
