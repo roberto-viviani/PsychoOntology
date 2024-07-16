@@ -2,7 +2,9 @@
 title: "Supplementary results B (replication)"
 author: "Roberto Viviani, University of Innsbruck"
 date: "2024-04-22"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 ---
 
 We present here the results of the OpenAI model of the main text with the other best performing model, gecko. Our intent is to verify the replicability of results. We also present the results obtained with the universal sentence encoder (USE), a model trained with a simpler architecture, to show the improvements in replicability obtained with the newer models. Details on the models and their source are in the methods section of the main text.

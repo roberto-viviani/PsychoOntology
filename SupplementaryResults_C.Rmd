@@ -2,7 +2,9 @@
 title: "Supplementary results C (English embeddings)"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, echo=FALSE, include=FALSE}

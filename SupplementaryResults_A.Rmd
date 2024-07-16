@@ -2,7 +2,9 @@
 title: "Supplementary results A"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
-output: pdf_document
+output:
+  word_document: default
+  pdf_document: default
 fontsize: 10pt
 ---
 
@@ -298,7 +300,7 @@ The item that was responsible for this association was NEOFFI19, "I would rather
 
 ### Openness to experience
 
-Finally, we show what appears to be a genuine association between low openness and anhedonia. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
+Finally, we show what appears to be a genuine association between low openness and the anhedonia facet of detachment. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
 
 ```{r openness_model, message = FALSE }
 corrs <- pearscorr(scales, "NEOoff", pidtraits)
