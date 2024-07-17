@@ -3,8 +3,8 @@ title: "Supplementary results A"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
 output:
-  pdf_document: default
   word_document: default
+  pdf_document: default
 fontsize: 10pt
 ---
 
@@ -163,7 +163,7 @@ The response correlations at low semantic distance are more likely to reflect se
 
 ```{r, message = FALSE}
 p + geom_text(data = filter(plotdata, traitPID == "Disinhibition" & 
-                              ((cosdist > 0.6 & corrs > 0.25) | cosdist < 0.45)), 
+                              (itemPID != "PID5BF27" & corrs > 0.25)), 
             aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
   labs(text = element_text(size = 16)) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
