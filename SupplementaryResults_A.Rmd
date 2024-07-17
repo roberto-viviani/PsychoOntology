@@ -3,8 +3,8 @@ title: "Supplementary results A"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
 output:
-  word_document: default
   pdf_document: default
+  word_document: default
 fontsize: 10pt
 ---
 
@@ -109,7 +109,8 @@ print(corrs)
 
 ```
 
-Only antagonism is not related to neuroticism, but the major associations are with detachment, disinhibition, and negative affect.
+Only antagonism is not related to neuroticism, but the major associations are with detachment, disinhibition, and especially negative affect.
+
 
 ```{r neuroticism, message = FALSE}
 plotdata <- filter(cordata, typeNEO == "Neuroticism")
@@ -123,16 +124,58 @@ p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5),
   labs(text = element_text(size = 16)) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
   geom_smooth(aes(color = traitPID), method = "lm", se = F)
-
 pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from = traitPID, values_from = cosdist), "corrs", traitnames)
 
 ```
 
-The items that drove the association between neuroticism and PID scores were primarily those of the PID facet anxiety, with some contribution from anhedonia. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants.
+The items that drove the association between neuroticism and negative affect were primarily those of the PID facet anxiety. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants. This association was given by item NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass").
 
-NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item is PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass"). In the plot, one can see that other emotional lability items intermixed with anhedonia items to give moderate associations with neuroticism.
+```{r, message = FALSE}
+p + geom_text(data = filter(plotdata, cosdist > 0.6 & traitPID == "Detachment" & corrs > 0.25), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
 
-There were also item pairs that the language model considered similar, but gave not correlation in the participant responses. The first pair was NEOFFI06 and PID5BF32 (grandiosity). The neuroticism item is "I often feel inferior to others" ("Ich fühle mich anderen oft unterlegen"), and the PID grandiosity item is "I often have to deal with people who are less important than me" ("Ich muss mich oft mit Leuten beschäftigen, die weniger wichtig sind als ich"). The language model here appears to have failed to code the difference between superiority/inferiority as a self-perception and as judgement of others. The other pair again included NEOFFI06, this time paired with PID5BF20 (manipulativeness), "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen"). The semantic similarity of these items appears to be coded too high by the language model.
+```
+
+However, there were items in NEO neuroticism that were given a relatively high semantic distance to the PID items (over 0.6) and gave nevertheless a response correlation of about 0.3. This pattern is suggestive of a genuine association. The most extreme cases, shown in the figure, are NEO item 56, "At times I have been so ashamed I just wanted to hide" ("Manchmal war mir etwas so peinlich, dass ich mich am liebsten versteckt hätte") and PID items 13, separation insecurity, "I worry a lot about being alone" ("Ich mache mir viele Sorgen darüber, allein zu sein"), and item 25, anxiousness "I worry about almost everything" ("Ich mache mir über fast alles Sorgen"). These findings appear to reflect the existence of genuine associations within the internalizing dimension of personality.
+
+Detachment and inhibition were uniformly associated with the response correlations also at high distances, a pattern that is suggestive of genuine associations.
+
+#### Neuroticism and detachment
+
+```{r, message = FALSE}
+p + geom_text(data = filter(plotdata, traitPID == "Detachment" & 
+                              ((cosdist > 0.6 & corrs > 0.25)|cosdist<0.45)), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
+
+```
+
+Let us have a look at the cases with large correlations at high semantic distances. They concern PID 10 from the anhedonia facet of detachment, which is "Nothing seems to interest me very much" ("Nichts scheint mich wirklich zu interessieren"). In the responses, this item is strongly correlated with NEO neuroticism 41, "Too often, when things go wrong, I get discouraged and feel like giving up", 51, "I often feel helpless and want someone else to solve my problems", and 11 "When I am under a great deal of stress, sometimes I feel like I'm going to pieces". Apart from the negative sentiment, these questions have little in common and therefore appear again to capture associations between different aspects of the internalization dimension.
+
+The response correlations at low semantic distance are more likely to reflect semantic similarites. They concern PID 28 from the anhedonia facet of detachment, "I rarely get enthusiastic about anything" ("Ich bin selten von irgendetwas begeistert"). This item is classified as semantically related to NEO neuroticism 46 "I am seldom sad or depressed", 16, "I rarely feel lonely or blue", and 31, "I rarely feel fear or anxious". The semantic similarity here appears to have captured common elements of depressed mood, but also appears to be driven by the common occurrence of the adverb "rarely" in all these sentences.
+
+#### Neuroticism and disinhibition
+
+```{r, message = FALSE}
+p + geom_text(data = filter(plotdata, traitPID == "Disinhibition" & 
+                              ((cosdist > 0.6 & corrs > 0.25) | cosdist < 0.45)), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
+```
+
+In the analysis of NEO neuroticism and PID disinhibition the language model detects genuine associations. The most pronounced cases concern NEO 46, "I am seldom sad or depressed", and PID 15 from the distractibility facet of disinhibition, "I lose track of conversations because other things catch my attention", and PID 27 from the impulsivity facet, "Even though I know better, I cannot stop making rash decisions". These items are indeed semantically very different and it is not clear why they were associated in the responses of our participants.
+
+#### Language model failures
+
+There were also item pairs that the language model considered similar, but gave low correlations in the participant responses. The first pair was NEOFFI06 and PID5BF32 (grandiosity). The neuroticism item is "I often feel inferior to others" ("Ich fühle mich anderen oft unterlegen"), and the PID grandiosity item is "I often have to deal with people who are less important than me" ("Ich muss mich oft mit Leuten beschäftigen, die weniger wichtig sind als ich"). The language model here coded as semantic similar opposite attitudes concerning self-esteem, which are indeed related in certain models of narcisstic psychopathology but not in the judgement of the individuals concerned. The other pair again included NEOFFI06, this time paired with PID5BF20 (manipulativeness), "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen"), again revolving around narcisstic themes.
+
 
 ### Extraversion
 
