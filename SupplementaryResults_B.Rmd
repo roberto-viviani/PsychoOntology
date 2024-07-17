@@ -177,7 +177,6 @@ pf <- function(plotdata) {
   p <- addneoline(p, plotdata, "NegativeAffect")
   p <- addneoline(p, plotdata, "Detachment")
   p <- addneoline(p, plotdata, "Disinhibition")
-  p <- addneoline(p, plotdata, "Antagonism")
   p <- p + labs(text = element_text(size = 16)) +
     geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
   p  

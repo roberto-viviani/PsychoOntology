@@ -161,7 +161,6 @@ p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
 p <- addneoline(p, plotdata, "Detachment")
 p <- addneoline(p, plotdata, "Disinhibition")
-p <- addneoline(p, plotdata, "Antagonism")
 p + geom_text(data = filter(plotdata, cosdist < 0.43 | corrs > 0.5), 
             aes(label = typePID), alpha = 0.4) + 
   labs(text = element_text(size = 16)) +
