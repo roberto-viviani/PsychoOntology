@@ -128,7 +128,7 @@ pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from
 
 ```
 
-The items that drove the association between neuroticism and negative affect were primarily those of the PID facet anxiety. We see also that the language model identified an association with an emotional lability item that was confirmed by the correlations of responses of participants. This association was given by item NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass").
+The items that drove the association between neuroticism and negative affect were primarily those of the PID facet anxiety of negative affect. We see also that the language model identified an association with an item from the emotional lability facet of negative affect  that was confirmed by the correlations of responses of participants. This association was given by item NEOFFI21 is "I often feel tense and jittery" ("Ich fühle mich oft angespannt und nervös"), and its paired item PID5BF19 (emotional lability), "I get emotional easily, often for very little reason" ("Ich werde schnell emotional, oft aus geringstem Anlass").
 
 ```{r, message = FALSE}
 p + geom_text(data = filter(plotdata, cosdist > 0.6 & traitPID == "Detachment" & corrs > 0.25), 
@@ -168,9 +168,31 @@ p + geom_text(data = filter(plotdata, traitPID == "Disinhibition" &
   labs(text = element_text(size = 16)) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
   geom_smooth(aes(color = traitPID), method = "lm", se = F)
+p + geom_text(data = filter(plotdata, traitPID == "Disinhibition" & 
+                              (itemPID != "PID5BF33" & corrs > 0.25)), 
+            aes(label = paste(itemNEO, itemPID, sep=":")), alpha = 0.4) + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
+  geom_smooth(aes(color = traitPID), method = "lm", se = F)
 ```
 
-In the analysis of NEO neuroticism and PID disinhibition the language model detects genuine associations. The most pronounced cases concern NEO 46, "I am seldom sad or depressed", and PID 15 from the distractibility facet of disinhibition, "I lose track of conversations because other things catch my attention", and PID 27 from the impulsivity facet, "Even though I know better, I cannot stop making rash decisions". These items are indeed semantically very different and it is not clear why they were associated in the responses of our participants.
+There were substantial associations between neuroticism and disinhibition that corresponded to a smaller average semantic distance than with other PID domains (see main text). Looking at the boxplot, we see that this smaller average semantic distance included individual item pairs at high distance that we may consider genuine association, and a larger number of items at a relatively low distance.
+
+Among the items at low distance we find neuroticism NEO 21, "I often feel tense and jittery". This item was considered by the model to be semantically related to PID 09 impulsivity, "I feel like I act totally on impulse", PID 27 impulsivity, "Even though I know better, I can't stop making rash decision", and PID 33 distractibility, "I am easily distracted". PID 33 was also semantically related to NEO41, "Too often, when things go wrong, I get discouraged and feel like giving up".
+
+Among the candidate genuine associations, the most cases at high semantic distance concern NEO 46, "I am seldom sad or depressed", and PID 15 from the distractibility facet of disinhibition, "I lose track of conversations because other things catch my attention", and PID 27 from the impulsivity facet, "Even though I know better, I cannot stop making rash decisions". These items are indeed semantically very different and it is not clear why they were associated in the responses of our participants.
+
+```{r, message = FALSE}
+##p %+% filter(plotdata, traitPID == "Disinhibition") +
+ggplot(data = filter(plotdata, traitPID == "Disinhibition"), 
+       aes(cosdist, corrs)) + theme_classic() + 
+  labs(text = element_text(size = 16)) +
+  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
+  geom_smooth(aes(color = typePID), method = "lm", se = F) +
+  geom_point(aes(color = typePID))
+
+```
+
 
 #### Language model failures
 
