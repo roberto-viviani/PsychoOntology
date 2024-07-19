@@ -59,7 +59,7 @@ traitnames <- c("Anankastia", "Antagonism", "Detachment",
 
 This document contains analyses that supplement the main text of "AI-driven assessment of semantic similarity and association of responses between the 'Big Five' and DSM-5/ICD-11 personality traits", by Karin Labek, Sandra Bennett-Long, and Roberto Viviani. See AnalysisMain.Rmd and AnalysisComparison.Rmd for the results reported in text.
 
-## Association of individual items in the NEO subscales
+## 1. Association of individual items in the NEO subscales
 
 In the following plots, we display the correlation of pairs of individual items on the cosine distance of embeddings to visualize the relation between semantic relatedness and correlation at a smaller level of granualarity. These plots, not shown in the main text for reasons of space, complement those shown there (the main text shows plot where each point is a pair of subscales, not of items). We used color to differentiate the PID facets, and plot the relationship between pairs with curves grouped by NEO subscales (which have different directions).
 
@@ -92,13 +92,13 @@ The plot on the right considers the absolute values of the correlations, to elim
 
 To obtain insight on the items driving these associations, we examined each NEO subscale in turn, avoiding the excessive clutter from the large number of item pairs. The following section reports all statistics computed for the NEO subscale (to complement the main text reporting only the most salient results), and details on the individual item pairs that showed conspicuous associations in the plots.
 
-## Individual NEO traits
+## 2. Individual NEO traits
 
 We report here the full tables of the statistics mentioned in text which could not be included for space reasons. We also repeat here for convenience the plots to which these statistics refer (already reported in the main text) to facilitate intepreting to what results the statistic tables refer.
 
 We also plot the associations between semantic similargy and reponse correlations indicating individual item pairs for associations that are particularly strong.
 
-### Neuroticism
+### 2.1 Neuroticism
 
 We first look at the correlations between neuroticism and PID domains in the data. In these and the following correlations, the stars denote significance at Bonferroni-corrected levels for the combinations of NEO traits and PID domains (* = p < 0.05; ** = p < 0.01; *** = p < 0.001).
 
@@ -182,24 +182,12 @@ Among the items at low distance we find neuroticism NEO 21, "I often feel tense 
 
 Among the candidate genuine associations, the most cases at high semantic distance concern NEO 46, "I am seldom sad or depressed", and PID 15 from the distractibility facet of disinhibition, "I lose track of conversations because other things catch my attention", and PID 27 from the impulsivity facet, "Even though I know better, I cannot stop making rash decisions". These items are indeed semantically very different and it is not clear why they were associated in the responses of our participants.
 
-```{r, message = FALSE}
-##p %+% filter(plotdata, traitPID == "Disinhibition") +
-ggplot(data = filter(plotdata, traitPID == "Disinhibition"), 
-       aes(cosdist, corrs)) + theme_classic() + 
-  labs(text = element_text(size = 16)) +
-  geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) + 
-  geom_smooth(aes(color = typePID), method = "lm", se = F) +
-  geom_point(aes(color = typePID))
-
-```
-
-
 #### Language model failures
 
 There were also item pairs that the language model considered similar, but gave low correlations in the participant responses. The first pair was NEOFFI06 and PID5BF32 (grandiosity). The neuroticism item is "I often feel inferior to others" ("Ich fühle mich anderen oft unterlegen"), and the PID grandiosity item is "I often have to deal with people who are less important than me" ("Ich muss mich oft mit Leuten beschäftigen, die weniger wichtig sind als ich"). The language model here coded as semantic similar opposite attitudes concerning self-esteem, which are indeed related in certain models of narcisstic psychopathology but not in the judgement of the individuals concerned. The other pair again included NEOFFI06, this time paired with PID5BF20 (manipulativeness), "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen"), again revolving around narcisstic themes.
 
 
-### Extraversion
+### 2.2 Extraversion
 
 Extraversion was associated with the PID domains detachment (as one would expect) and negative affect.
 
@@ -234,7 +222,7 @@ We see here that the discrepancy between low semantic distance according to the 
 
 However, these associations could not be replicated in the gecko model (see Supplementary results B). The anomalous association shown here with negative affect, in particular, could not be replicated.
 
-### Conscientiousness
+### 2.3 Conscientiousness
 
 For conscientiousness, we can show that with lower semantic distance the associations diverge into two groups.
 
@@ -333,7 +321,7 @@ rm(geckoemb)
 
 ```
 
-### Agreeableness
+### 2.4 Agreeableness
 
 Agreeableness has widespread negative associations with PID domains, but as expected antagonism stands out.
 
@@ -363,7 +351,7 @@ pearscorr(plotdata |> select(traitPID, corrs, cosdist) |> pivot_wider(names_from
 
 The item that was responsible for this association was NEOFFI19, "I would rather cooperate with others than compete with them" ("Ich würde lieber mit anderen zusammenarbeiten, als mit ihnen zu wetteifern") which was semantically related to PID5BF26, "I'll stretch the truth if it's to my advantage" ("Ich biege mir die Wahrheit zurecht, wenn es zu meinem Vorteil ist") and 20, "It is easy for me to take advantage of others" ("Es fällt mir leicht, andere auszunutzen").
 
-### Openness to experience
+### 2.5 Openness to experience
 
 Finally, we show what appears to be a genuine association between low openness and the anhedonia facet of detachment. "Genuine", because the language model detects no semantic affinity between the items of openness and anhedonia, but in some cases a negative association is present among participants.
 
