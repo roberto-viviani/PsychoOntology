@@ -39,10 +39,25 @@ pearscorr <- function(data, yvar, xvars) {
 
 # utility to estimate anova for distances
 library(lme4)
+library(forcats)
+library(lmerTest)
 anovadist <- function(plotdata) {
+  # omnibus test
   test <- anova(lmer(cosdist ~ 1 + (1 | itemNEO) + (1 | itemPID), data=plotdata),
                 lmer(cosdist ~ traitPID + (1 | itemNEO) + (1 | itemPID), data=plotdata))
   print(paste("Chi square:", test$Chisq[2], ", df", test$Df[2], ", p =", 
               test$`Pr(>Chisq)`[2]))
-  test
+  
+  # test relative to most distant
+  tmp <- lmer(cosdist ~ -1 + traitPID + (1 | itemNEO) + (1 | itemPID), data=plotdata)
+  mostdist <- which.max(fixef(tmp))
+  mostdist <- sub("traitPID", "", names(mostdist))
+  print(c("PID trait with largest distance: ", mostdist))
+  traits <- levels(factor(plotdata$traitPID))
+  for (i in 1 : length(traits)) {
+    if (traits[i] != mostdist) 
+      plotdata$traitPID <- fct_relevel(plotdata$traitPID, traits[i], after = Inf)
+  }
+  print(summary(lmerTest::lmer(cosdist ~ traitPID + (1 | itemNEO) + (1 | itemPID), data=plotdata)))
+  
 }

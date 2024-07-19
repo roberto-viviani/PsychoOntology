@@ -1,11 +1,12 @@
 ---
-title: "Ontology Models"
+title: "Analysis Main"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
 output:
-  pdf_document: default
+  word_document: default
   html_document:
     df_print: paged
+  pdf_document: default
 ---
 
 This markdown contains the code used for the results of the manuscript "AI-driven assessment of semantic similarity and association of responses between the 'Big Five' and DSM-5/ICD-11 personality traits", by Karin Labek, Sandra Bennett-Long, and Roberto Viviani.
@@ -155,7 +156,7 @@ anovadist(plotdata)
 
 # test of association between NEO correlations and semantic distance
 corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
-summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+summary(lmer(abs(r) ~ cosdist + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "NegativeAffect")
@@ -199,7 +200,7 @@ anovadist(plotdata)
 
 # test of association between NEO correlations and semantic distance
 corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
-summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+summary(lmer(abs(r) ~ cosdist + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
@@ -243,7 +244,7 @@ anovadist(plotdata)
 
 # test of association between NEO correlations and semantic distance
 corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
-summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+summary(lmer(abs(r) ~ cosdist + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Anankastia")
@@ -326,12 +327,11 @@ anovadist(plotdata)
 
 # test of association between NEO correlations and semantic distance
 corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
-summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+summary(lmer(abs(r) ~ cosdist + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Antagonism")
 p <- addneoline(p, plotdata, "Psychoticism")
-p <- addneoline(p, plotdata, "Detachment")
 p + geom_text(data = filter(plotdata, cosdist < 0.5, corrs < -0.2), 
             aes(label = typePID), alpha = 0.4) +
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE)
@@ -371,7 +371,7 @@ anovadist(plotdata)
 
 # test of association between NEO correlations and semantic distance
 corrs$traitPID <- stringi::stri_sub(row.names(corrs), from = 4)
-summary(lmer(cosdist ~ abs(r) + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
+summary(lmer(abs(r) ~ cosdist + (1 | itemNEO), left_join(plotdata, corrs, by = "traitPID")))
 
 p <- baseplot(plotdata)
 p <- addneoline(p, plotdata, "Detachment")
