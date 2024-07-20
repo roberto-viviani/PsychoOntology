@@ -3,7 +3,6 @@ title: "Supplementary results A"
 author: "Roberto Viviani, Karin Labek, University of Innsbruck"
 date: "2024-04-18"
 output:
-  word_document: default
   pdf_document: default
 fontsize: 10pt
 ---
