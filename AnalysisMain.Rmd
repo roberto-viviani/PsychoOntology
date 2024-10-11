@@ -122,20 +122,66 @@ ggsave("subscales_signed_openAI_large.pdf", width = 150, height = 95, units = "m
 
 ```
 
+## Additional analyses
+
 ```{r, message = FALSE, warning = FALSE}
+plotdata <- cordata |> mutate(corr = corrs, dist = cosdist)
 ggplot(
   cordata |> group_by(typeNEO, traitPID) |> summarize(corr = mean(corrs), dist = mean(cosdist)),
   aes(y = corr, x = dist, color = typeNEO)) + 
   geom_hline(yintercept = 0, color = "darkgrey", show.legend = FALSE) +
-  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.8, size = 4) +
-  geom_smooth(aes(color = typeNEO), formula = y ~ x, method = "lm", se = F) + 
+  geom_point(aes(color = typeNEO, shape = traitPID), alpha = 0.6, size = 4) +
+  geom_point(data = plotdata, aes(color = typeNEO, shape = traitPID), alpha = 0.2, size = 1) +
+  geom_smooth(data = plotdata, aes(color = typeNEO), formula = y ~ x, method = "glm", se = F) + 
   scale_color_viridis_d() + 
   labs(color = "NEO trait", shape = "PID domain") + 
   xlab("semantic distance") + ylab("avg correlation") + 
   facet_wrap(. ~ typeNEO) + theme_bw() + theme(panel.grid = element_blank())
+rm(plotdata)
 #ggsave("subscales_signed_openAI_large.pdf", width = 150, height = 95, units = "mm")
 
 ```
+
+What we see below is a boxplot of correlations between the NEO and PID subscales, ordered by the average semantic distance between the items of the subscales.
+
+```{r}
+ggplot(cordata, aes(x=cosdist, y=corrs)) + geom_boxplot(aes(group = forcats::fct_cross(typeNEO, traitPID), fill = typeNEO), alpha = 0.5) + theme_classic() + scale_fill_viridis_d()
+
+```
+
+We model this with the interaction between the average distances in each NEO/PIDs combination and the combinations themselves. First, we test that the interaction as a whole is significant in an ANOVA omnibus test, which of course is highly significant, meaning the average distance and correlation of responses differs among the combinations.
+
+```{r, message = F}
+p <- cordata |> group_by(typeNEO, traitPID) |> summarise(avgdist = mean(cosdist))
+cordataex <- left_join(cordata, p, by = c("typeNEO", "traitPID"))
+
+fit <- lm(corrs ~ -1 + avgdist:typeNEO:traitPID, data = cordataex)
+anova(fit)
+```
+
+
+We model this with an ANOVA, using the NEO/PIDs combination as a random effect. If we add the average distances, the random effects are unexplained correlations. 
+
+The largest distance is between openness and antagonism. We reparametrize the ANOVA such that this combiation is the baseline.
+
+```{r}
+cordataex$combination <- forcats::fct_cross(cordataex$typeNEO, cordataex$traitPID)
+cordataex$combination <- forcats::fct_relevel(cordataex$combination, "Openness:Antagonism")
+
+summary(lm(corrs ~ avgdist:combination, data = cordataex))
+```
+
+This is another strategy, where we model the groups as a random effect and add the distance as a general predictor. The distance within the groups indexes heterogeneity.
+
+```{r}
+p <- cordata |> group_by(typeNEO, traitPID) |> summarise(avgdist = mean(cosdist))
+cordataex <- left_join(cordata, p, by = c("typeNEO", "traitPID"))
+
+fit <- lmer(abs(corrs) ~ -1 + avgdist + (1 | typeNEO:traitPID) + (I(cosdist-mean(cosdist))-1 | typeNEO:traitPID), data = cordataex)
+summary(fit)
+
+```
+
 
 ## Table 1, Figure 2
 
