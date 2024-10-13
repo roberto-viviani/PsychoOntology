@@ -196,7 +196,7 @@ Once the existence of an association between semantic distance and response corr
 
 What we see from the preceding figure is some subscale pairs show average correlation levels that are much higher than expected from the overall fit of the predicted correlation from semantic similarity (in black). While semantic distance is predictive of correlations, these subscale pairs have an absolute association that remains positive even at high semantic distances, such as 0.75, taken as a baseline correlation level. These are candidate genuine association pairs.
 
-To estimate this quantity statistical and provide inference, we may rebase the semantic distance such that the intercept corresponds to the semantic distance 0.75. This quantity is given as the subscale pairs-specific intercept, whose confidence intervals give us an assessment of the extent to which the subscale pair is correlating higher than expected from the semantic similarity of their items.
+To estimate this quantity statistical and provide inference, we may use the inference for the subscale-pair intercepts. In a fixed effects model, this quantity is relative to a reference subscale-pair. Using a random effect to estimate these group effects has the advantage that the estimates are relative to a general mean effect.
 
 A further improvement of the model is to allow the slopes to vary in each subscale pair. Because a model with fixed effects here gives the impression of overfitting, we use random effects for both intercepts and slopes. We log-transform the rates, as if they were odds, to fit a linear model. We use stan to get good estimate of intervals.
 
