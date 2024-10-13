@@ -63,36 +63,57 @@ neotraits <-c("NEOvertr" = "agreeableness",
               "NEOneuro" = "neuroticism", 
               "NEOoff" = "openness")
 
-```
+## additional variables in revised
 
-
-## Associations between scales
-
-We can test which NEO/PID subscale pairs showed significant correlations by computing an ANOVA on the correlations. This test does not tell us if the correlations were due to semantic distance, but only that the subscale pairs were correlated. We first test that the correlations differ systematically between the pairs,
-
-```{r}
-fit <- lm(corrs ~ -1 + typeNEO:traitPID, data = cordata)
-anova(fit)
-
-```
-
-and then which pairs were significantly correlated.
-
-```{r}
-summary(fit)
-```
-
-Because there are 30 combinations between subscale pairs, the threshold for significance should be set to 0.05/30 = 0.0017, which means that two asterisks in the printout above are required to reject the null. As one may expect, most subscales are correlated, with the largest association being between negative affect and neuroticism. Neuroticism has positive correlations, all other NEO traits have negative correlations.
-
-The question of interest here, however, is not the existence of associations between NEO and PID subscales but the extent to which this may be demonstrably due to semantic similarities between the subscales. Below is a boxplot of correlations between the NEO and PID item pairs, ordered by the average semantic distance between the items of the subscales.
-
-```{r, message = F}
 corstats <- cordata |> group_by(typeNEO, traitPID) |> summarise(avgdist = mean(cosdist), avgcorr = mean(corrs), meddist = median(cosdist), medcorr = median(corrs), lqcorr = quantile(corrs, 0.25), hqcorr = quantile(corrs, 0.75), maxcorr = max(corrs), mincorr = min(corrs))
 cordataex <- left_join(cordata, corstats, by = c("typeNEO", "traitPID"))
 cordataex$pair <- forcats::fct_cross(cordataex$typeNEO, cordataex$traitPID)
 cordataex$pair <- forcats::fct_relevel(cordataex$pair, "Openness:Antagonism")
 
 
+```
+
+
+## Associations between scales
+
+The average correlation between NEO and PID scales, computed from the correlation of the items, is shown in the following figures.
+
+```{r, message = FALSE}
+txt <- data.frame()
+for (pid in pidtraits) {
+  tx <- pearscorr(scales, pid, neonames)
+  tx[,"PIDdomain"] <- pid
+  tx[,"NEOtrait"] <- neotraits[row.names(tx)]
+  row.names(tx) <- NULL
+  tx <- tx[,c("PIDdomain", "NEOtrait", "r", "t", "p", "pcorr")]
+  txt <- rbind(txt,tx)
+}
+
+ggplot(txt, aes(y = r, x = NEOtrait, fill = PIDdomain)) + 
+  geom_col(position = "dodge") +
+  scale_fill_viridis_d(option = "E") + 
+  labs(fill = "PID domain") + 
+  xlab("NEO trait") + ylab("correlation") + theme_grey() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+ggplot(txt, aes(y = r, x = PIDdomain, fill = NEOtrait)) + 
+  geom_col(position = "dodge") +
+  scale_fill_viridis_d() + 
+  labs(fill = "NEO trait") + 
+  xlab("PID domain") + ylab("correlation") + theme_grey() + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+print(txt)
+
+```
+
+Because there are 30 combinations between subscale pairs, a threshold of t ~ 3.5 in the printout above would required to reject the null after correcting for mutiple testing. As one may expect, most subscales are correlated, with the largest association being between negative affect and neuroticism. Neuroticism has positive correlations, all other NEO traits have negative correlations.
+
+## Response correlations and semantic similarity
+
+The question of interest here, however, is not the existence of associations between NEO and PID subscales but the extent to which this may be demonstrably due to semantic similarities between the subscales. Below is a boxplot of correlations between the NEO and PID item pairs, ordered by the average semantic distance between the items of the subscales.
+
+```{r, message = FALSE}
 ggplot(cordataex, aes(x=meddist, y=corrs)) + 
   geom_boxplot(aes(group = pair), alpha = 0.5, staplewidth = 60) + 
   geom_rect(data = corstats, aes(xmin = meddist-0.001, xmax = meddist+0.001, ymin = lqcorr, ymax = hqcorr, fill = typeNEO), inherit.aes = F, alpha = 0.65) +
@@ -102,11 +123,9 @@ ggplot(cordataex, aes(x=meddist, y=corrs)) +
 
 ```
 
-From this plot, one can see that at high semantic distances (i.e., > 0.65) there is no average correlation between responses and distance. At lower distances, correlations start to emerge. Note, however, that correlations may be positive as well as negative: the median correlations diverge at lower distances (the exception is conscientiousness and anakastia). Semantic distances are known to be low for antonyms (as antonyms occur in the same textual context), so what we have is that semantic distance predicts both positive and negative correlation.
+From this plot, one can see that at high semantic distances (i.e., > 0.65) there is no average correlation between responses and distance. At lower distances, correlations start to emerge. Note, however, that correlations may be positive as well as negative: the median correlations diverge at lower distances (the exception is conscientiousness and anakastia). Semantic distances are known to be low for antonyms (as antonyms occur in the same textual context), so what we have is that semantic distance predicts both positive and negative correlation. This is a convenient feature of embeddings from large language models, as scales may in general vary the direction in which they are scored.
 
-## Testing contamination by semantic similarty
-
-To formally test that semantic distance is predictive of correlation, we model the absolute average correlation (instead of the signed correlation) as an effect of average semantic distance between the subscales. We use a logistic binomial model to take into account that now the absolute average correlations are positive. The test and the corresponding plot of the fit are below.
+To formally test that semantic distance is predictive of correlation between the subscales, we model the absolute average correlation (instead of the signed correlation) as an effect of average semantic distance between the subscales. We use a logistic binomial model to take into account that now the absolute average correlations are positive. The test and the corresponding plot of the fit are below.
 
 
 ```{r, message = FALSE, warning = FALSE}
@@ -130,66 +149,132 @@ The test shows that semantic distance significantly predicts the absolute correl
 
 ## Modelling predicted correlation of item pairs
 
-There are limitations with this model, however. One is that the average semantic distance within subscales may be a poor predictor of response correlations when this distance varies a lot in the subscale item pairs. Indeed, one may expect this when the content of one or the other subscales are heterogeneous. Here, we see that anankastia and conscientousness give a poor association for the close semantic distance. However, this pair also contains the strongest item associations. Indeed, we find that there is a lot of internal predictivity of distance, but that the distances vary a lot.
+There are limitations with this model, however. One is that the average semantic distance within subscales may be a poor predictor of response correlations when this distance varies a lot in the subscale item pairs. Indeed, one may expect this when the content of one or the other subscales are heterogeneous. In the boxplot shown previously, we see that anankastia and conscientousness gave a poor association for the close semantic distance. However, this pair also contained the strongest item associations. When we plot the relationship between semantic distance and response correlation at the level of individual item pars within these subscales, we find that distance is highly predictive of response correlation, but since distances wary a lot the average prediction is much poorer.
 
 
-```{r}
-ggplot(cordata |> filter(typeNEO == "Conscientiousness", traitPID == "Anankastia"), aes(x = cosdist, y = corrs)) + geom_point(aes(color = typePID), size = 3) + theme_classic() + labs(x = "semantic distance", y = "items correlation") + scale_color_viridis_d(end = 0.9, begin = 0.3, option = "G")
+```{r, message = FALSE, warning = FALSE }
+ggplot(cordata |> filter(typeNEO == "Conscientiousness", traitPID == "Anankastia"), aes(x = cosdist, y = abs(corrs))) + 
+  geom_point(aes(color = typePID), size = 3) + 
+  geom_smooth(se = F, color = "darkgrey", method = "glm", 
+              method.args = c(family=quasibinomial)) +
+  theme_classic() + 
+  labs(x = "semantic distance", y = "items correlation") +
+  scale_color_viridis_d(end = 0.9, begin = 0.3, option = "G")
 ```
 
-For this reason, while the model fitted above demonstrates that the associations between NEO and PID subscales are contaminated by semantic similarities, it is not the best model to assess the extent to which semantic similarity is predictive of association. 
+For this reason, while the model fitted above demonstrates that the associations between NEO and PID subscales are contaminated by semantic similarities, it is not the best model to assess the extent to which semantic similarity is itself predictive of association. 
 
-The second limitation is that the associations may vary in direction within the same subscale pair. This will be especially the case if similar item pairs exist, but they have varying directionality. In the plot above, we see that some subscale pairs have correlations close to zero but the correlations of items span positive and negative values. It is not enough to consider absolute average correlations.
+The second limitation is that the associations may vary in direction within the same subscale pair. This will be especially the case if similar item pairs exist, but they have varying directionality. In the plot above, we see that some subscale pairs have correlations close to zero but the correlations of items span positive and negative values. In general, it may not be appropriate to consider average correlations.
 
 To address these limitations, we may fit a model at the level of item pairs.
 
 ```{r}
-cordataex$cosdist.b <- cordataex$cosdist - 0.677
-cordataex$pair <- forcats::fct_cross(cordataex$typeNEO, cordataex$traitPID)
-cordataex$pair <- forcats::fct_relevel(cordataex$pair, "Openness:Antagonism")
-fit <- glm(abs(corrs) ~ pair + cosdist.b, family = quasibinomial, data = cordataex)
-summary(fit)
-```
+fit <- glm(abs(corrs) ~ cosdist + pair, family = quasibinomial, data = cordataex)
+cf <- summary(fit)$coefficients
+cf["cosdist",]
 
-We need the intercept here, because the correlation is always positive. We rebase the semantic distance such that the intercept corresponds to the estimated correlation at the average semantic distance for the subscale pair with largest distance, which is openness/antagonism at 0.677. According to the model, at our threshold and in the baseline NEO/PID pair there is an absolute correlation of r=0.05, which might be deemed acceptable as a baseline. The test assesses significance as associations where the fitted correlation in the pair is over and above the level explained by the semantic distance.
-
-```{r}
+# plot
 cf <- coef(fit)
-ggplot(cordataex, aes(x = cosdist.b, y = plogis(cf[1] + cf["cosdist.b"]*cosdist.b))) + 
-  geom_line() + labs(x = "sem. distance, rebased at 0.677", y = "fitted correlation") +
+ggplot(cordataex, aes(x=cosdist, y=fitted(fit))) + 
+  geom_point(aes(y = abs(corrs), color = typeNEO), alpha = 0.1) +
+  geom_line(aes(color=typeNEO, linetype=traitPID), alpha = 1) + 
+  geom_line(aes(y = plogis(cf[1]+cf["cosdist"]*cosdist)), color="black", linewidth = 1) + 
+  labs(x = "semantic distance", y = "fitted response correlation", 
+       linetype = "PID domain", color = "NEO trait") +
+  scale_color_viridis_d() +
   theme_minimal()
 
 ```
 
-This is the plot of the fitted correlations. One can see that while semantic distance is predictive of correlations, some subscale pairs have an absolute association that remains positive even at high semantic distances. These are candidate genuine association pairs.
+We see that in this model the evidence for the effect of semantic distance is much larger (t = about 13). 
 
-```{r}
-ggplot(cordataex, aes(x = cosdist, y = fitted(fit))) + 
-  geom_line(aes(color = typeNEO, linetype = traitPID), linewidth = 1, alpha = 0.9) + 
-  scale_color_viridis_d() + 
-  labs(x = "semantic distance", y = "fitted response corr.", 
-       linetype = "PID domain", color = "NEO trait") + 
-  theme_minimal()
-```
+We need an intercept in this model, because the absolute correlation is always positive. However, we can also see that at distances of about 0.75, the correlation plateaus at about 0.05.
 
-Inference on these pairs may then be given by the confidence intervals associated to the coefficient of the pairs, given that the model was parametrized such that these coefficients correspond to distance 0.677. A way to improve on this model is to adopt a Bayesian framework to compute these confidence intervals. We use here a beta binomial model to model the overdispersion of rates, instead of using the quasibinomial family (the fractional logit), thus also verifying the robustness of our modelling strategy.
+## Which scales are candidate genuine associations?
+
+Once the existence of an association between semantic distance and response correlations has been demonstrated, the important question remains of response correlations that are larger than expected from what predicted by semantic distance. These are candidate genuine correlations, i.e. correlation over and above what one may expect from the semantic similarity of scale items.
+
+What we see from the preceding figure is some subscale pairs show average correlation levels that are much higher than expected from the overall fit of the predicted correlation from semantic similarity (in black). While semantic distance is predictive of correlations, these subscale pairs have an absolute association that remains positive even at high semantic distances, such as 0.75, taken as a baseline correlation level. These are candidate genuine association pairs.
+
+To estimate this quantity statistical and provide inference, we may rebase the semantic distance such that the intercept corresponds to the semantic distance 0.75. This quantity is given as the subscale pairs-specific intercept, whose confidence intervals give us an assessment of the extent to which the subscale pair is correlating higher than expected from the semantic similarity of their items.
+
+A further improvement of the model is to allow the slopes to vary in each subscale pair. Because a model with fixed effects here gives the impression of overfitting, we use random effects for both intercepts and slopes. We log-transform the rates, as if they were odds, to fit a linear model. We use stan to get good estimate of intervals.
 
 ```{r}
 library(rstanarm)
-
+library(bayesplot)
 cordataex$cosdist.b <- cordataex$cosdist - 0.75
-fitb <- stan_betareg(abs(corrs) ~ cosdist.b + pair, link = "logit", data = cordataex, cores = 4)
 
-plotdata <- as.matrix(fitb)
-plotdata <- plotdata[,3:31]
+fitlo <- stan_lmer(log(abs(corrs) / (1 - abs(corrs))) ~ cosdist.b + (cosdist.b || pair), data = cordataex, cores = 4)
+
+plotdata <- as.matrix(fitlo)
+plotdata <- plotdata[,3:32]
 mcmc_intervals(plotdata) + geom_vline(xintercept = 0) + theme_minimal()
 rm(plotdata)
 
 ```
 
-As one can see, according to the model there are several candidate genuine associations. The largest is neuroticism and negative affect, of course, but also conscientiousness and disinhibition appear to go very much beyond their semantic similarity.
+As one can see, according to the model there are several candidate genuine associations. The largest is neuroticism/extraversion and negative affect, of course, but also conscientiousness and disinhibition appear to go very much beyond their semantic similarity.
 
-We now repeat the plot of the fitted response correlations, which turns out to be very similar to the one obtained with the fractional logit model with overdispersion.
+We now plot the group-specific slopes.
+
+```{r}
+fitted <- fitlo$fitted.values
+ggplot(cordataex, aes(x = cosdist, y = exp(exp(fitted)/(1+exp(fitted))))) + 
+  geom_line(aes(color = typeNEO, linetype = traitPID), linewidth = 1, alpha = 0.9) + 
+  scale_color_viridis_d() + 
+  labs(x = "semantic distance", y = "fitted response corr.", 
+       linetype = "PID domain", color = "NEO trait") + 
+  theme_minimal()
+
+```
+
+There is a problem with extraversion and negative affect, which have a positive slope, as shown below:
+
+```{r, message = FALSE }
+ggplot(cordata |> filter(typeNEO == "Extraversion", traitPID == "NegativeAffect"), aes(x = cosdist, y = abs(corrs))) + geom_point(aes(color = typePID), size = 3) + theme_classic() + labs(x = "semantic distance", y = "items correlation") + scale_color_viridis_d(end = 0.9, begin = 0.3, option = "G") + 
+  geom_smooth(method = "lm")
+```
+
+this turns out to be due to a genuine negative association between negative affect and the subscale anxiety, which at distance 0.6 is very far from the intercept.
+
+```{r, message = FALSE }
+ggplot(cordata |> filter(typeNEO == "Extraversion", traitPID == "NegativeAffect"), aes(x = cosdist, y = abs(corrs))) + geom_point(aes(color = typePID), size = 3) + theme_classic() + labs(x = "semantic distance", y = "items correlation") + scale_color_viridis_d(end = 0.9, begin = 0.3, option = "G") + 
+  geom_smooth(aes(color = typePID), method = "glm", alpha = 0.2, method.args = c("family"="quasibinomial"))
+```
+
+This needs to be investigated further.
+
+We can also check the intervals of the pair-specific slopes, to see where there was strong heteregeneity of semantic determination of responses:
+
+```{r}
+plotdata <- as.matrix(fitlo)
+plotdata <- plotdata[,33:62]
+mcmc_intervals(plotdata) + geom_vline(xintercept = 0) + theme_minimal()
+rm(plotdata)
+
+```
+
+## beta binomial model
+
+A way to improve on this model is to adopt a Bayesian framework to compute these confidence intervals. We use here a beta binomial model to model the overdispersion of rates, instead of using the quasibinomial family (the fractional logit), thus also verifying the robustness of our modelling strategy. Here, however, we are not modelling subscale pairs as random effects. For this reason, coefficients are relative to a reference intercept/reference slope, which that of the openness/antagonism pair. Futhermore, like the equivalent fractional logistic model, it tends to overfit the group-specific slopes. 
+
+```{r}
+library(rstanarm)
+library(bayesplot)
+
+cordataex$cosdist.b <- cordataex$cosdist - 0.75
+fitb <- stan_betareg(abs(corrs) ~ pair + cosdist.b + cosdist.b:pair, link = "logit", data = cordataex, cores = 4)
+
+plotdata <- as.matrix(fitb)
+plotdata <- plotdata[,2:30]
+mcmc_intervals(plotdata) + geom_vline(xintercept = 0) + theme_minimal()
+rm(plotdata)
+
+```
+
+We now repeat the plot of the fitted response correlations, which turns out to be very similar to the one obtained with the fractional logit model with overdispersion (not shown here). The fractional logit can be used here because there are no random effects.
+
 
 ```{r}
 ggplot(cordataex, aes(x = cosdist, y = fitb$fitted.values)) + 
@@ -200,28 +285,6 @@ ggplot(cordataex, aes(x = cosdist, y = fitb$fitted.values)) +
   theme_minimal()
 
 ```
-
-### Beta binomial with random effects
-
-However, what we would like is to estimate the correlation at the baseline threshold, an effect of semantic distance, and the departures of the subscale pairs from this estimate as an index of genuine correlation. We can do this by modelling the pairs coefficients as a random effect, but unfortunately the model fails to converge. glmer does not cope with non-binary outcomes.
-
-(brms does not help on its own, as it does not provide a beta binomial model with random effects for fractional outcomes, only counts).
-
-We test here the log-odds approach.
-
-```{r}
-fitlo <- lmer(log(abs(corrs) / (1 - abs(corrs))) ~ cosdist.b + (1 | pair), data = cordataex)
-summary(fitlo)
-
-ggplot(cordataex, aes(x = cosdist, y = exp(fitted(fitlo))/(1+exp(fitted(fitlo))))) + 
-  geom_line(aes(color = typeNEO, linetype = traitPID), linewidth = 1, alpha = 0.9) + 
-  scale_color_viridis_d() + 
-  labs(x = "semantic distance", y = "fitted response corr.", 
-       linetype = "PID domain", color = "NEO trait") + 
-  theme_minimal()
-
-```
-
 
 ### References
 
@@ -234,58 +297,3 @@ Kubinec, Robert (2023). Fixing fractional logit? https://www.robertkubinec.com/p
 Kubinec, Robert (2022). Ordered beta regression: A parsimonius, well-fitting model for continuous data with lower and upper bounds. Political Analysis. 2023;31(4):519-536. doi:10.1017/pan.2022.20 
 
 Wikipedia. Fracional model. https://en.wikipedia.org/wiki/Fractional_model
-
-
-### Scratch
-
-In this model, subscale pairs with high distance are the implicit control group for subscale pairs at low distance. To look at this, we model the correlation between responses of item pairs as an effect of their semantic distance within each subscale pair. The existence of significant associations constitutes evidence that, relative to item pairs with high semantic distance, those with low distance gave more correlated answers, suggesting that the subscale pairs were heterogenous with respect to semantic similarity.
-
-Because a model with fixed effects gives the impression of overfitting, we use random effects for both intercepts and slopes. We log-transform the rates, as if they were odds, to fit a linear model.
-
-```{r}
-cordataex$cosdist.b <- cordataex$cosdist - 0.75
-
-fitlo <- lmer(log(abs(corrs) / (1 - abs(corrs))) ~ cosdist.b + (cosdist.b || pair), data = cordataex)
-summary(fitlo)
-
-ggplot(cordataex, aes(x = cosdist, y = exp(fitted(fitlo))/(1+exp(fitted(fitlo))))) + 
-  geom_line(aes(color = typeNEO, linetype = traitPID), linewidth = 1, alpha = 0.9) + 
-  scale_color_viridis_d() + 
-  labs(x = "semantic distance", y = "fitted response corr.", 
-       linetype = "PID domain", color = "NEO trait") + 
-  theme_minimal()
-
-```
-
-There is a problem with extraversion and negative affect. Shown below,
-
-```{r, message = FALSE }
-ggplot(cordata |> filter(typeNEO == "Extraversion", traitPID == "NegativeAffect"), aes(x = cosdist, y = abs(corrs))) + geom_point(aes(color = typePID), size = 3) + theme_classic() + labs(x = "semantic distance", y = "items correlation") + scale_color_viridis_d(end = 0.9, begin = 0.3, option = "G") + 
-  geom_smooth(method = "lm")
-```
-
-it turns out to be due to a genuine negative association between negative affect and the subscale anxiety, which at distance 0.6 is very far from the intercept.
-
-```{r, message = FALSE }
-ggplot(cordata |> filter(typeNEO == "Extraversion", traitPID == "NegativeAffect"), aes(x = cosdist, y = abs(corrs))) + geom_point(aes(color = typePID), size = 3) + theme_classic() + labs(x = "semantic distance", y = "items correlation") + scale_color_viridis_d(end = 0.9, begin = 0.3, option = "G") + 
-  geom_smooth(aes(color = typePID), method = "glm", alpha = 0.2, method.args = c("family"="quasibinomial"))
-```
-
-This needs to be investigated further.
-
-### Scratch
-
-In this model, we also have estimates of correlations at the model intercept, set here at 0.75. This value is a threshold we may set to consider two subscales to be genuinely associated. Note that there is an element of conditionality: the association can only be assessed given an arbitrary value of this threshold. The higher the threshold, the less subscale pairs that are assessed as genuinely associated. This is due to the fact that semantic similarity is not an all or nothing property, but is a matter of degree.
-
-Note however that we assume here that the correlations between item pairs in a NEO/PID subscale are in the same direction. We need to resort to the logistic binomial model to remove this assumption. (The problem of this model is that it requires an intercept, because we cannot assume zero as a baseline, but then the coefficients are relative to the NEO/PID pair that is left out and taken as baseline. It is openness/antagonism here. The regression terms are still all there. The baseline is the estimated correlation at the threshold level in the baseline subscales pair. For this reason, we now use as baseline the average distance for the most distant subscale pair.)
-
-```{r}
-cordataex$cosdist.b <- cordataex$cosdist - 0.677
-cordataex$pair <- forcats::fct_cross(cordataex$typeNEO, cordataex$traitPID)
-cordataex$pair <- forcats::fct_relevel(cordataex$pair, "Openness:Antagonism")
-
-fit <- glm(abs(corrs) ~ pair + pair:cosdist.b, data = cordataex, family = quasibinomial)
-summary(fit)
-```
-
-## Old text
