@@ -192,23 +192,25 @@ We need an intercept in this model, because the absolute correlation is always p
 
 ## Which scales are candidate genuine associations?
 
-Once the existence of an association between semantic distance and response correlations has been demonstrated, the important question remains of response correlations that are larger than expected from what predicted by semantic distance. These are candidate genuine correlations, i.e. correlation over and above what one may expect from the semantic similarity of scale items.
+Once the existence of an association between semantic distance and response correlations has been demonstrated, the important question remains of estimating response correlations at the net of the correlation predicted by semantic distance. We would like to model correlations as determined by two components: one produced by semantic similarity, and one that represents candidate genuine correlations.
 
-What we see from the preceding figure is some subscale pairs show average correlation levels that are much higher than expected from the overall fit of the predicted correlation from semantic similarity (in black). While semantic distance is predictive of correlations, these subscale pairs have an absolute association that remains positive even at high semantic distances, such as 0.75, taken as a baseline correlation level. These are candidate genuine association pairs.
+The approach that we will follow here is to model square correlations rather than the correlations themselves. This has two reasons: one is that semantic similarity predicts positive as well as negative correlations, without predicting which of the two; the second, that square correlations appear more suited to model additive components to the observed association. The drawback is that square correlations are biased away from zero, although this problem can be alleviated by including a bias correction in the computations.
+
+To obtain these measures of association, one may adjust for the semantic distance between item pairs. A grouping variable pools an overall estimate of correlation (and relative confidence intervals) between subscale pairs. That is, we use the fitted correlation estimate as a proxy of the adjusted correlation.
 
 To estimate this quantity statistical and provide inference, we may use the inference for the subscale-pair intercepts. In a fixed effects model, this quantity is relative to a reference subscale-pair. Using a random effect to estimate these group effects has the advantage that the estimates are relative to a general mean effect.
 
-A further improvement of the model is to allow the slopes to vary in each subscale pair. Because a model with fixed effects here gives the impression of overfitting, we use random effects for both intercepts and slopes. We log-transform the rates, as if they were odds, to fit a linear model. We use stan to get good estimate of intervals.
+A further improvement of the model is to allow the slopes to vary in each subscale pair. This model allows the relationship between semantic similarity and response correlations to vary, because there are factors that may influence this relationship between the items, such as varying amount of genuine correlations. Because a model with fixed effects here gives the impression of overfitting, we use random effects. We log-transform the rates, as if they were odds, to fit a linear model. We use stan to get good estimate of intervals.
 
 ```{r}
 library(rstanarm)
 library(bayesplot)
 cordataex$cosdist.b <- cordataex$cosdist - 0.75
 
-fitlo <- stan_lmer(log(abs(corrs) / (1 - abs(corrs))) ~ cosdist.b + (cosdist.b || pair), data = cordataex, cores = 4)
+fitlo <- stan_lmer(log(abs(corrs^2) / (1 - abs(corrs^2))) ~ pair + cosdist.b + (cosdist.b - 1 | pair), data = cordataex, cores = 4)
 
 plotdata <- as.matrix(fitlo)
-plotdata <- plotdata[,3:32]
+plotdata <- plotdata[,2:31]
 mcmc_intervals(plotdata) + geom_vline(xintercept = 0) + theme_minimal()
 rm(plotdata)
 
@@ -220,7 +222,7 @@ We now plot the group-specific slopes.
 
 ```{r}
 fitted <- fitlo$fitted.values
-ggplot(cordataex, aes(x = cosdist, y = exp(exp(fitted)/(1+exp(fitted))))) + 
+ggplot(cordataex, aes(x = cosdist, y = exp(fitted)/(1+exp(fitted)))) + 
   geom_line(aes(color = typeNEO, linetype = traitPID), linewidth = 1, alpha = 0.9) + 
   scale_color_viridis_d() + 
   labs(x = "semantic distance", y = "fitted response corr.", 
@@ -290,10 +292,20 @@ ggplot(cordataex, aes(x = cosdist, y = fitb$fitted.values)) +
 
 Ferrari, SLP and Cribari-Neto, F (2004) “Beta Regression for Modeling Rates and Proportions”. Journal of Applied Statistics. Vol. 31, No. 07, p. 799-815.
 
-Papke, Leslie E and Wooldridge, Jeffrey M (1996). "Econometric methods for fractional response variables with an application to 401(k) plan participation rates". Journal of Applied Econometrics 11:619-632.  (the fractional logistic model approach)
+Papke, Leslie E and Wooldridge, Jeffrey M (1996). "Econometric methods for fractional response variables with an application to 401(k) plan participation rates". Journal of Applied Econometrics 11:619-632.  (the fractional logistic model approach, also called quasi-binomial model, check McCullagh & Nelder 1989)
 
 Kubinec, Robert (2023). Fixing fractional logit? https://www.robertkubinec.com/post/frac_logit/ (accessed 13.10.2024)
 
 Kubinec, Robert (2022). Ordered beta regression: A parsimonius, well-fitting model for continuous data with lower and upper bounds. Political Analysis. 2023;31(4):519-536. doi:10.1017/pan.2022.20 
 
 Wikipedia. Fracional model. https://en.wikipedia.org/wiki/Fractional_model
+
+Ferrari, S., & Cribari-Neto, F. (2004). Beta regression for modelling rates and proportions. Journal of applied statistics, 31(7), 799-815.  (the original formulation of beta regression)
+
+Rigby, R. A., & Stasinopoulos, D. M. (2005). Generalized additive models for location, scale and shape. Journal of the Royal Statistical Society Series C: Applied Statistics, 54(3), 507-554. (allows for flexibility in handling various types of response variables, including bounded and ordinal data)
+
+Cribari-Neto, F., & Zeileis, A. (2010). Beta Regression in R. Journal of Statistical Software, 34(2), 1–24. https://doi.org/10.18637/jss.v034.i02 (a good explanation, no, an excellent explanation)
+
+Ali, Gabry, & Goodrich. Modelling rates/proportions using beta regression with rstanarm. 2020. https://mc-stan.org/rstanarm/articles/betareg.html
+
+
